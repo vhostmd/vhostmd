@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+Copyright (C) 2009 Novell, Inc.
+
+Metric DTD
+
+-->
+
+<!ELEMENT metric (name,value)>
+
+<!ATTLIST metric 
+          type (int32|uint32|int64|uint64|real32|real64|string) #REQUIRED
+          context (host|vm) #REQUIRED
+          id CDATA #IMPLIED
+          uuid CDATA #IMPLIED
+>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT value (#PCDATA)>

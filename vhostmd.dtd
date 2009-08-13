@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+Copyright (C) 2008 Novell, Inc.
+
+Virtual Host Metrics Daemon (vhostmd). Configuration file DTD 
+
+-->
+
+<!ELEMENT vhostmd (globals,metrics)>
+<!ELEMENT globals (disk,update_period,path,transport+)>
+
+<!ELEMENT disk (name,path,size)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT size (#PCDATA)>
+<!ATTLIST size 
+          unit CDATA #REQUIRED>
+<!ELEMENT update_period (#PCDATA)>
+<!ELEMENT transport (#PCDATA)>
+
+<!ELEMENT metrics (metric*)>
+<!ELEMENT metric (name,action,variable*)>
+<!ELEMENT action (#PCDATA)>
+<!ATTLIST metric 
+          type (xml|group|int32|uint32|int64|uint64|real32|real64|string) #REQUIRED
+          context (host|vm) #REQUIRED
+          cnt CDATA #IMPLIED
+>
+<!ELEMENT variable (#PCDATA)>
+<!ATTLIST variable 
+          name CDATA #REQUIRED
+          type (int32|uint32|int64|uint64|real32|real64|string) #REQUIRED
+>

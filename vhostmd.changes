@@ -1,0 +1,52 @@
+-------------------------------------------------------------------
+Mon Jun 29 16:42:39 MDT 2009 - jfehlig@novell.com
+
+- Validate XML returned by 'action' for metric type 'xml'
+- Do not convert metrics values internally in vhostmd.  Treat
+  all metric values as strings and leave it to consumers to do
+  any conversion.
+
+-------------------------------------------------------------------
+Fri Jun 26 17:24:38 MDT 2009 - jfehlig@novell.com
+
+- Allow larger buffer for 'xml' type
+
+-------------------------------------------------------------------
+Thu Jun 25 22:24:27 MDT 2009 - jfehlig@novell.com
+
+- Add metric type 'XML'
+
+-------------------------------------------------------------------
+Fri Jun 19 14:19:19 MDT 2009 - jfehlig@novell.com
+
+- vhostmd is currently only used with Xen so make it
+  ExclusiveArch x86 and x86_64
+
+-------------------------------------------------------------------
+Mon Jun 15 14:47:42 MDT 2009 - jfehlig@novell.com
+
+- Truncate metrics disk on open
+
+-------------------------------------------------------------------
+Tue Jun  9 09:30:06 MDT 2009 - jfehlig@novell.com
+
+- Change COPYING from GPL3 to LGPL2.1
+
+-------------------------------------------------------------------
+Fri Jun  5 11:16:36 MDT 2009 - jfehlig@novell.com
+
+- Explicitly name subpackages with -n
+
+-------------------------------------------------------------------
+Thu Jun  4 18:29:39 MDT 2009 - jfehlig@novell.com
+
+- Version 0.2
+  - Updated documentation
+  - Added group metric type
+  - Added perl script for generating {PageIn,PageFault}Rate
+
+------------------------------------------------------------
+Wed Jan 7 12:39:17 MST 2009 - plc@novell.com
+
+- Initial creation
+

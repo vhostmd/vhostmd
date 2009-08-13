@@ -1,0 +1,90 @@
+.TH VM-DUMP-METRICS 1
+.SH NAME
+vm-dump-metrics \- Dump VM metrics.
+.SH SYNOPSIS
+.B vm-dump-metrics
+[
+.I OPTION
+]
+.SH "DESCRIPTION"
+.BR vm-dump-metrics
+reads virtualization hosts provided metrics decription and dumps output
+.SH OPTIONS
+.B \-f, --dest <file>
+Specify a dump file to be used instead of <stdout>
+
+.SH XML Format of Content
+
+The content is an XML document containing host provided.  The format is quite simple and is illustrated below.
+
+    <metrics>
+      <metric type='real64' context='host'>
+        <name>TotalCPUTime</name>
+        <value>846.600000</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PageInRate</name>
+        <value>0.000000</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PageFaultRate</name>
+        <value>0.000000</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PagedOutMemory</name>
+        <value>6885044</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PagedInMemory</name>
+        <value>2367980</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>FreeMem</name>
+        <value>829</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>UsedMem</name>
+        <value>1369088</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>TotalPhyMem</name>
+        <value>1919</value>
+      </metric>
+      <metric type='uint32' context='host'>
+        <name>NumCPUs</name>
+        <value>2</value>
+      </metric>
+      <metric type='uint32' context='host'>
+        <name>TotalPhyCPUs</name>
+        <value>2</value>
+      </metric>
+      <metric type='string' context='host'>
+        <name>VirtualizationVendor</name>
+        <value>SUSE LINUX Products GmbH</value>
+      </metric>
+      <metric type='string' context='host'>
+        <name>HostName</name>
+        <value>laptop</value>
+      </metric>
+      <metric type='real64' context='vm' id='0' \
+           uuid='00000000-0000-0000-0000-000000000000'>
+        <name>TotalCPUTime</name>
+        <value>847.700000</value>
+      </metric>
+      <metric type='real64' context='vm' id='2' \
+           uuid='6be3fdb8-bef5-6fec-b1b7-e61bbceab708'>
+        <name>TotalCPUTime</name>
+        <value>69.400000</value>
+      </metric>
+    </metrics>
+
+.SH FILES
+.IR /usr/sbin/vm-dump-metrics
+
+.SH SEE ALSO
+.BR 
+.SH AUTHORS
+     Pat Campbell <plc@novell.com>.
+     Jim Fehlig <jfehlig@novell.com>.
+
+

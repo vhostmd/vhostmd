@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+
+<!--
+
+Copyright (C) 2008 Novell, Inc.
+
+This file describes the format of metrics data collected in a virtual
+host system and written to a metrics virtual block device (mvbd) mounted
+read/write in the virtual host.  The mvbd can be surfaced read-only to
+virtual machines using meachanisms provided by the virtual host.
+
+The mvbd is a raw, file-backed block device (potentially ramdisk)
+containing:
+
+Signature: 4 bytes, network order
+Busy:      4 bytes, network order
+Sum:       4 bytes, network order
+Length:    4 bytes, network order
+Content:   length bytes
+
+Signature is static and set to 'mvbd'.  Busy is 0 when not writing to disk.
+Sum and Length are the md5 checksum and length of content, respectively.
+
+Content is self describing in the DTD and example below.  Current metric
+types are: int32, uint32, int64, uint64, real32, real64, and string.  The
+context attribute specifies whether the metric is host or vm.
+
+-->
+  <metrics>
+    <metric type="uint32" context="host">
+      <name>TotalPhyCPUs</name>
+      <value>16</value>
+    </metric>
+    <metric type="uint64" context="host">
+      <name>TotalPhyMem</name>
+      <value>8124</value>
+    </metric>
+    <metric type="uint64" context="host">
+      <name>FreePhyMem</name>
+      <value>8124</value>
+    </metric>
+    <metric type="uint32" context="vm" id="0">
+      <name>NumCPUsUtilized</name>
+      <value>16</value>
+    </metric>
+    <metric type="real64" context="vm" id="0">
+      <name>TotalCPUTime</name>
+      <value>1234.567</value>
+    </metric>
+    <metric type="uint64" context="vm" id="0">
+      <name>PagedOutMemory</name>
+      <value>123456</value>
+    </metric>
+    <metric type="uint32" context="vm" id="2">
+      <name>NumCPUsUtilized</name>
+      <value>16</value>
+    </metric>
+    <metric type="real64" context="vm" id="2">
+      <name>TotalCPUTime</name>
+      <value>1234.567</value>
+    </metric>
+    <metric type="uint64" context="vm" id="2">
+      <name>PagedOutMemory</name>
+      <value>123456</value>
+    </metric>
+  </metrics>

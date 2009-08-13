@@ -1,0 +1,8 @@
+#!/bin/sh
+
+DIR=`mktemp -d -p /tmp` 
+rm -fr $DIR
+mkdir -p $DIR/vhostmd-1.0
+cp -r ../../vhostmd/* $DIR/vhostmd-1.0
+cd $DIR
+tar --exclude-from=$OLDPWD/exclude -vcj -f $OLDPWD/../vhostmd.tar.bz2 vhostmd-1.0

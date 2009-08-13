@@ -1,0 +1,56 @@
+{
+   libvirt: thread (1) free
+   Memcheck:Free
+   fun:free
+   fun:__virFree
+   obj:/usr/lib64/libvirt.so.0.4.6
+   obj:/usr/lib64/libvirt.so.0.4.6
+   obj:/usr/lib64/libvirt.so.0.4.6
+   fun:vu_num_vms
+   fun:metrics_vms_get
+   fun:vhostmd_run
+   fun:main
+}
+{
+   libvirt: thread (1) calloc
+   Memcheck:Leak
+   fun:calloc
+   fun:__virAllocN
+   obj:/usr/lib64/libvirt.so.0.4.6
+   obj:/usr/lib64/libvirt.so.0.4.6
+   obj:/usr/lib64/libvirt.so.0.4.6
+   fun:vu_num_vms
+   fun:metrics_vms_get
+   fun:vhostmd_run
+   fun:main
+}
+{
+   vhostmd: thread (1) write param
+   Memcheck:Param
+   write(buf)
+   fun:write
+   fun:metrics_disk_header_update
+   fun:metrics_disk_update
+   fun:vhostmd_run
+   fun:main
+}
+{
+   vhostmd: libxenctrl 1
+   Memcheck:Cond
+   fun:xc_domain_getinfo
+   fun:vu_num_vms
+   fun:metrics_vms_get
+   fun:vhostmd_run
+   fun:main
+}
+{
+   vhostmd: libxenctrl 2
+   Memcheck:Cond
+   fun:xc_domain_getinfo
+   fun:vu_get_vms
+   fun:metrics_vms_get
+   fun:vhostmd_run
+   fun:main
+}
+
+

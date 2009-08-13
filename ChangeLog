@@ -1,0 +1,20 @@
+-------------------------------------------------------------------
+Wed Dec 17 10:45:53 MST 2008 - plc@novell.com
+
+- Added AUTHORS, COPYING, INSTALL, NEWS, README files
+
+-------------------------------------------------------------------
+Fri 12 Dec 17:27:55 MST 2008 - jfehlig@novell.com
+
+- dev checkpoint.  Added buffer support in utils.
+
+-------------------------------------------------------------------
+Wed 10 Dec 18:57:26 MST 2008 - jfehlig@novell.com
+
+- Added config file for vhost metrics daemon
+
+-------------------------------------------------------------------
+Wed 10 Dec 17:07:01 MST 2008 - jfehlig@novell.com
+
+- Initial import of virtual host metrics daemon (vhostmd).
+

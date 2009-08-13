@@ -1,0 +1,230 @@
+.TH VHOSTMD 8
+.SH NAME
+vhostmd \- A metrics gathering daemon.
+.SH SYNOPSIS
+.B vhostmd
+[
+.I OPTION
+]
+.SH "DESCRIPTION"
+.BR vhostmd
+provides a "metrics communication channel" between a host and its hosted virtual machines, allowing limited introspection of host resource usage from within virtual machines.  This functionality may be useful in hosting environments, giving virtual machine administrators a limited view of host resource consumption - potentially explaining a performance degradation within the virtual machine.
+.PP
+vhostmd will periodically write metrics to a disk.  The metrics to write, how often, and where to write them are all adjustable via the /etc/vhostmd/vhostmd.conf configuration file.  The disk can then be surfaced read-only to virtual machines using tools provided by the host's virtualization platform.
+.SH OPTIONS
+.TP
+.B \-v, --verbose
+Verbose messages
+.TP
+.B \-d, --no-daemonize
+Process will not daemonize
+.TP
+.B \-p, --pid-file <file>
+Specify an alternate path for vhostmd to record its process-id in. Normally /var/run/vhostmd.pid
+.TP
+.B \-f, --config <file>
+Specify a different configuration file. Normally /etc/vhostmd.xml
+.SH CONFIG FILE
+At startup, vhostmd reads
+.I /etc/vhostmd/vhostmd.conf,
+if it exists. 
+ (See the 
+.B \-f
+option.)
+
+The default configuration file (listed below) defines a 256Kbyte metrics disk in /dev/shm/vhostmd/disk0, updated every 5 seconds.  It also includes a few examples of user-defined metrics, which provide a (currently simplistic) mechanism for extending metrics gathered by vhostmd.  
+
+  <vhostmd>
+    <globals>
+      <disk>
+        <name>host-metrics-disk</name>
+        <path>/dev/shm/vhostmd/disk0</path>
+        <size unit="k">256</size>
+      </disk>
+      <update_period>5</update_period>
+      <path>/usr/bin:/usr/sbin:/usr/share/vhostmd/scripts</path>
+    </globals>
+    <metrics>
+      <metric type="string" context="host">
+        <name>HostName</name>
+        <action>virsh hostname | tr -d '[:space:]'</action>
+      </metric>
+      <metric type="string" context="host">
+        <name>VirtualizationVendor</name>
+        <action>/bin/rpm -q --info xen | grep Vendor: |
+                 awk '{print substr($0, index($0,$5)) }'</action>
+      </metric>
+      <metric type="uint32" context="host">
+        <name>TotalPhyCPUs</name>
+        <action>xm info | gawk '/^nr_cpus/ {print $3}'</action>
+      </metric>
+      <metric type="uint32" context="host">
+        <name>NumCPUs</name>
+        <action>xm info | gawk '/^nr_cpus/ {print $3}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>TotalPhyMem</name>
+        <action>xm info | gawk '/^total_memory/ {print $3}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>UsedMem</name>
+        <action>xentop -b -i 1 | gawk '/Domain-0/ {print $5}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>FreeMem</name>
+        <action>xm info | gawk '/^max_free_memory/ {print $3}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>PagedInMemory</name>
+        <action>vmstat -s | gawk '/pages paged in/ {print $1}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>PagedOutMemory</name>
+        <action>vmstat -s | gawk '/pages paged out/ {print $1}'</action>
+      </metric>
+      <metric type="group" context="host">
+        <name>PageRates</name>
+        <action>pagerate.pl</action>
+        <variable name="PageInRate" type="uint64"/>
+        <variable name="PageFaultRate" type="uint64"/>
+      </metric>
+      <metric type="real64" context="host">
+        <name>TotalCPUTime</name>
+        <action>virsh dominfo 0 | sed 's/: */:/' |
+                 gawk -F: '/CPU time/ {print $2;}'</action>
+      </metric>
+      <metric type="real64" context="vm">
+        <name>TotalCPUTime</name>
+        <action>virsh dominfo NAME | sed 's/: */:/' |
+                 gawk -F: '/CPU time/ {print $2;}'</action>
+      </metric>
+      <metric type="xml" context="vm">
+        <name>my-metric</name>
+        <action>xml-metrics-test.sh</action>
+      </metric>
+    </metrics>
+  </vhostmd>
+
+A valid configuration file must contain the root element <vhostmd>.
+The <globals> element contains configuration global to vhostmd, such as
+the metrics disk path and the metrics refresh interval.  The <metrics>
+element is a container for all of the <metric> elements.  A metric element
+is used to define a metric, giving it a name and an action that produces
+the metric value.
+
+The supplied vhostmd configuration file provides a useful set of default
+metrics to be collected.  This can be extended or modified by editing
+/etc/vhostmd/vhostmd.conf and changing existing metric definitions or
+adding new metric definitions under the metrics container.
+
+Defined metrics begin with the <metric> element, which contains two
+attributes: type and context.  The type attribute is used to describe the
+metric's value type.  Supported types are int32, uint32, int64, uint64,
+real32, real64, string, group, and xml. group is used when an action returns
+more than one metric value. xml is the most flexible type and specifies that
+the metric's action returns valid metric XML.  The context attribute is used
+to indicate whether this is a host or vm metric.  Supported contexts are
+host and vm.
+
+Currently, the metric element contains 3 elements: name, action, and variable.
+The name element defines the metric's name.  The action element describes a
+command or pipeline of commands used to gather the metric.  For metrics of
+vm context, the tokens NAME, ID, and UUID may be used where these attributes
+of a VM are normally provided in a command.  When the metric is sampled, these
+tokens will be substituted with the actual name, ID, or UUID of the vm currently
+being sampled by vhostmd.  If the metric type is xml, action is expected to
+retrun valid metric XML as defined below in "XML Format of Content".
+
+.SH Metrics Disk Format
+
+Currently, the disk format is quite simple: a raw, file-backed disk containing a header, immediately followed by metric content.
+
+The header contains the following, all in network-byte order
+
+ - 4 byte signature, 'mvbd'
+ - 4 byte busy flag
+ - 4 byte content checksum
+ - 4 byte content length
+
+The busy flag permits simple reader/writer synchronization.  The busy flag can be checked for clear, content read into a buffer, and the busy flag checked again for clear to ensure stable content.
+
+.SH XML Format of Content
+
+The content is an XML document containing default and user-defined metrics.  The format is quite similar to the metrics definitions found in the vhostmd configuration file. A notable addition, as illustrated below, is the value element containing the metric's current value.
+
+    <metrics>
+      <metric type='real64' context='host'>
+        <name>TotalCPUTime</name>
+        <value>846.600000</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PageInRate</name>
+        <value>0.000000</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PageFaultRate</name>
+        <value>0.000000</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PagedOutMemory</name>
+        <value>6885044</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>PagedInMemory</name>
+        <value>2367980</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>FreeMem</name>
+        <value>829</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>UsedMem</name>
+        <value>1369088</value>
+      </metric>
+      <metric type='uint64' context='host'>
+        <name>TotalPhyMem</name>
+        <value>1919</value>
+      </metric>
+      <metric type='uint32' context='host'>
+        <name>NumCPUs</name>
+        <value>2</value>
+      </metric>
+      <metric type='uint32' context='host'>
+        <name>TotalPhyCPUs</name>
+        <value>2</value>
+      </metric>
+      <metric type='string' context='host'>
+        <name>VirtualizationVendor</name>
+        <value>SUSE LINUX Products GmbH</value>
+      </metric>
+      <metric type='string' context='host'>
+        <name>HostName</name>
+        <value>laptop</value>
+      </metric>
+      <metric type='real64' context='vm' id='0'
+           uuid='00000000-0000-0000-0000-000000000000'>
+        <name>TotalCPUTime</name>
+        <value>847.700000</value>
+      </metric>
+      <metric type='real64' context='vm' id='2'
+           uuid='6be3fdb8-bef5-6fec-b1b7-e61bbceab708'>
+        <name>TotalCPUTime</name>
+        <value>69.400000</value>
+      </metric>
+    </metrics>
+
+.SH FILES
+.IR /etc/vhostmd/vhostmd.conf 
+
+.IR /etc/vhostmd/vhostmd.dtd 
+
+.IR /etc/vhostmd/metric.dtd 
+
+.IR /var/run/vhostmd.pid
+.SH SEE ALSO
+.BR 
+.SH AUTHORS
+     Pat Campbell <plc@novell.com>.
+     Jim Fehlig <jfehlig@novell.com>.
+
+

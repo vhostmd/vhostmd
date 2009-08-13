@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<!DOCTYPE vhostmd SYSTEM "vhostmd.dtd">
+
+<!--
+
+Copyright (C) 2008 Novell, Inc.
+
+Configuration file for virtual host metrics daemon (vhostmd).
+
+A metrics disk between 1024 bytes and 256Mbytes is supported.
+
+Supported metric types are: int32, uint32, int64, uint64, real32,
+real64, and string
+
+A metric's value is set to the output produced by executing its action.
+
+'action' can include the special token NAME, in which case the name of
+the vm currently under inspection is substituted for NAME.  Only useful
+within the vm element.
+
+-->
+
+  <vhostmd>
+    <globals>
+      <disk>
+        <name>host-metrics-disk</name>
+        <path>/dev/shm/vhostmd/disk0</path>
+        <size unit="k">256</size>
+      </disk>
+      <update_period>5</update_period>
+      <path>/usr/bin:/usr/sbin:/usr/share/vhostmd/scripts</path>
+      <transport>vbd</transport>
+      <!-- <transport>xenstore</transport> -->
+    </globals>
+    <metrics>
+      <metric type="string" context="host">
+        <name>HostName</name>
+        <action>virsh hostname | tr -d '[:space:]'</action>
+      </metric>
+      <metric type="string" context="host">
+        <name>VirtualizationVendor</name>
+        <action>/bin/rpm -q --info xen | grep Vendor: | \
+                awk '{print substr($0, index($0,$5)) }'</action>
+      </metric>
+      <metric type="string" context="host">
+        <name>VirtualizationProductInfo</name>
+        <action>xm info | gawk '/^xen_(major|minor|extra)/ {print $3}' | \
+                tr -d . | tr '[:space:]' .</action>
+      </metric>
+      <metric type="uint32" context="host">
+        <name>TotalPhyCPUs</name>
+        <action>xm info | gawk '/^nr_cpus/ {print $3}'</action>
+      </metric>
+      <metric type="uint32" context="host">
+        <name>NumCPUs</name>
+        <action>xm info | gawk '/^nr_cpus/ {print $3}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>TotalPhyMem</name>
+        <action>xm info | gawk '/^total_memory/ {print $3}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>UsedMem</name>
+        <action>echo "$((`xentop -b -i 1 | gawk '/Domain-0/ {print $5}'` / 1024))"</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>FreeMem</name>
+        <action>xm info | gawk '/^max_free_memory/ {print $3}'</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>PagedInMemory</name>
+        <action>echo "$((`vmstat -s | gawk '/pages paged in/ {print $1}'` / 1024))"</action>
+      </metric>
+      <metric type="uint64" context="host">
+        <name>PagedOutMemory</name>
+        <action>echo "$((`vmstat -s | gawk '/pages paged out/ {print $1}'` / 1024))"</action>
+      </metric>
+      <metric type="group" context="host">
+        <name>PageRates</name>
+        <action>pagerate.pl</action>
+        <variable name="PageInRate" type="uint64"/>
+        <variable name="PageFaultRate" type="uint64"/>
+      </metric>
+      <metric type="real64" context="host">
+        <name>TotalCPUTime</name>
+        <action>virsh dominfo 0 | sed 's/: */:/' | \
+                gawk -F: '/CPU time/ {print $2;}'</action>
+      </metric>
+      <metric type="real64" context="vm">
+        <name>TotalCPUTime</name>
+        <action>virsh dominfo NAME | sed 's/: */:/' | \
+                gawk -F: '/CPU time/ {print $2;}'</action>
+      </metric>
+    </metrics>
+  </vhostmd>
