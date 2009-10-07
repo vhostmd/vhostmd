@@ -30,7 +30,7 @@ vhostmd [options]
 Configuration File
 ------------------
 The default configuration file (example listed below) defines a 256Kbyte
-metrics disk in /dev/shm/vhostmd/disk0, updated every 5 seconds.  It also
+metrics disk in /dev/shm/vhostmd0, updated every 5 seconds.  It also
 includes a few examples of user-defined metrics, which provide a
 (currently simplistic) mechanism for extending metrics gathered by vhostmd.
 
@@ -38,7 +38,7 @@ includes a few examples of user-defined metrics, which provide a
     <globals>
       <disk>
         <name>host-metrics-disk</name>
-        <path>/dev/shm/vhostmd/disk0</path>
+        <path>/dev/shm/vhostmd0</path>
         <size unit="k">256</size>
       </disk>
       <update_period>5</update_period>

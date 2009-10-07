@@ -24,7 +24,7 @@ within the vm element.
     <globals>
       <disk>
         <name>host-metrics-disk</name>
-        <path>/dev/shm/vhostmd/disk0</path>
+        <path>/dev/shm/vhostmd0</path>
         <size unit="k">256</size>
       </disk>
       <update_period>5</update_period>

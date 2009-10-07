@@ -308,7 +308,7 @@ retry:
 
       asprintf(&path, "/dev/%s", entry->d_name);
 #else
-      path = strdup("/dev/shm/vhostmd/disk0");
+      path = strdup("/dev/shm/vhostmd0");
 #endif
       fp = fopen(path, "r");
       if (fp == NULL) {

@@ -85,7 +85,7 @@ typedef struct _mdisk_header
 static int down = 0;
 static int mdisk_size = MDISK_SIZE_MIN;
 static int update_period = 5;
-static char *def_mdisk_path = "/dev/shm/vhostmd/disk0";
+static char *def_mdisk_path = "/dev/shm/vhostmd0";
 static char *mdisk_path = NULL;
 static char *pid_file = "/var/run/vhostmd.pid";
 static metric *metrics = NULL;
