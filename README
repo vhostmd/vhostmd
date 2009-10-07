@@ -255,6 +255,18 @@ libvirt would be the preferred tool, e.g.
   virsh attach-disk <vm> /path/to/metrics/disk xvdd --driver tap
     --subdriver aio --type disk --mode readonly
 
+You can also edit the configuration of a domain using
+'virsh edit guestname' and add the following clause into the <devices>
+section:
+
+  <disk type='block' device='disk'>
+    <source dev='/dev/shm/vhostmd0'/>
+    <target dev='hdb' bus='ide'/>
+    <readonly/>
+  </disk>
+
+(Note: Change target dev and bus as appropriate for the domain)
+
 
 Guest Tool/Library for Accessing Metrics Data
 ---------------------------------------------
