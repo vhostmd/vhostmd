@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 #include <dirent.h>
@@ -278,6 +279,45 @@ out:
    return ret;
 }
 
+/* Read from an O_DIRECT device.  You can't do arbitrary reads on
+ * such devices.  You can only read block-aligned block-sized
+ * chunks of data into block-aligned memory.
+ *
+ * This returns 'size' bytes in 'buf', read from 'offset' in the
+ * file 'fd'.
+ */
+
+/* There's no way to determine this, so just choose a large
+ * block size.
+ */
+#define BLOCK_SIZE 65536
+
+static int
+odirect_read (int fd, void *buf, size_t offset, size_t size)
+{
+  if (lseek (fd, 0, SEEK_SET) == -1)
+    return -1;
+
+  size_t n = ((offset + size) + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  void *mem;
+  int r;
+  r = posix_memalign (&mem, BLOCK_SIZE, n);
+  if (r != 0) {
+    errno = r;
+    return -1;
+  }
+
+  if (read (fd, mem, n) != n) {
+    free (mem);
+    return -1;
+  }
+
+  memcpy (buf, (char *) mem + offset, size);
+
+  free (mem);
+  return 0;
+}
+
 /*
  * Read metrics disk and populate mdisk
  *  Location of metrics disk is derived by looking at all block
@@ -289,7 +329,7 @@ static int read_mdisk(metric_disk *mdisk)
    mdisk_header md_header;
    uint32_t busy;
    uint32_t sig;
-   FILE *fp;
+   int fd;
    char *path;
 
    DIR* dir;
@@ -310,51 +350,54 @@ retry:
 #else
       path = strdup("/dev/shm/vhostmd0");
 #endif
-      fp = fopen(path, "r");
-      if (fp == NULL) {
-         free(path);
+      /* Open with O_DIRECT to avoid kernel keeping old copies around
+       * in the cache.
+       */
+      fd = open (path, O_RDONLY|O_DIRECT);
+      if (fd == -1) {
+         free (path);
          continue;
       }
-      if (fread(&md_header, 1, sizeof(md_header), fp) != sizeof(md_header)) {
-         free(path);
-         fclose(fp);
+      if (odirect_read (fd, &md_header, 0, sizeof md_header) == -1) {
+         free (path);
+	 close (fd);
          continue;
       }
 
       if ((sig = ntohl(md_header.sig)) == MDISK_SIGNATURE) {
          busy = ntohl(md_header.busy);
          if (busy) {
-            fclose(fp);
-            free(path);
-            sleep(1);
-            goto retry;
+	     close(fd);
+             free(path);
+             sleep(1);
+             goto retry;
          }
          mdisk->sum = ntohl(md_header.sum);
          mdisk->length = ntohl(md_header.length);
          mdisk->buffer = malloc(mdisk->length);
          mdisk->disk_name = strdup(path);
-         fread(mdisk->buffer, 1, mdisk->length, fp);
-		 free(path);
+	 /* XXX check return value */
+         odirect_read (fd, mdisk->buffer, sizeof md_header, mdisk->length);
+	 free(path);
 
          /* Verify data still valid */
-         fseek(fp, 0, SEEK_SET);
-         if (fread(&md_header, 1, sizeof(md_header), fp) != sizeof(md_header)) {
-             mdisk_content_free();
-             fclose(fp);
+         if (odirect_read (fd, &md_header, 0, sizeof md_header) == -1) {
+	     mdisk_content_free();
+             close (fd);
              sleep(1);
              goto retry;
          }
          busy = ntohl(md_header.busy);
          if (busy || mdisk->sum != ntohl(md_header.sum)) {
              mdisk_content_free();
-             fclose(fp);
+             close (fd);
              sleep(1);
              goto retry;
          }
-         fclose(fp);
-		 break;
+         close (fd);
+	 break;
       }
-      fclose(fp);
+      close (fd);
    }
 
    if (mdisk->buffer == NULL)
@@ -391,20 +434,20 @@ static uint32_t read_mdisk_sum(metric_disk *mdisk)
 {
    mdisk_header md_header;
    uint32_t sum = 0;
-   FILE *fp;
+   int fd;
 
    if (mdisk == NULL || mdisk->disk_name == NULL)
        return 0;
 
-   fp = fopen(mdisk->disk_name, "r");
-   if (fp == NULL) 
-	  return 0;
+   fd = open(mdisk->disk_name, O_RDONLY|O_DIRECT);
+   if (fd == -1) 
+       return 0;
    
-   if (fread(&md_header, 1, sizeof(md_header), fp) != sizeof(md_header)) {
-	  fclose(fp);
-	  return 0;
+   if (odirect_read (fd, &md_header, 0, sizeof md_header) == -1) {
+       close(fd);
+       return 0;
    }
-   fclose(fp);
+   close (fd);
 
    if (ntohl(md_header.sig) == MDISK_SIGNATURE) {
       if (ntohl(md_header.busy)) {
