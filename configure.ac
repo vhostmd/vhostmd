@@ -72,11 +72,11 @@ fi
 # Configure argument to support using xenstore in domU utility 
 AC_ARG_WITH([xenstore],
             [  --with-xenstore      use xenstore in domU utility ],
-  [case "${enableval}" in
+  [case "${withval}" in
    yes) with_xenstore=true
         ;;
    no) with_xenstore=false;;
-   *) AC_MSG_ERROR(bad value ${enableval} for --with-xenstore) ;;
+   *) AC_MSG_ERROR(bad value ${withval} for --with-xenstore) ;;
   esac],[with_xenstore=false]) 
 AM_CONDITIONAL(WITH_XENSTORE, test x$with_xenstore = xtrue)
 
