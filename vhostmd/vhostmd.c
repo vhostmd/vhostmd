@@ -451,8 +451,14 @@ static int parse_transports(xmlDocPtr xml,
       if (str) {
          if (strncasecmp((char *)str, "vbd", strlen("vbd")) == 0)
              transports |= VBD;
-         if (strncasecmp((char *)str, "xenstore", strlen("xenstore")) == 0)
+         if (strncasecmp((char *)str, "xenstore", strlen("xenstore")) == 0) {
+#ifdef WITH_XENSTORE
              transports |= XENSTORE;
+#else
+	     vu_log (VHOSTMD_ERR, "No support for xenstore transport in this vhostmd");
+	     return -1;
+#endif
+	 }
          free(str);
       }
    }
@@ -910,8 +916,10 @@ static int vhostmd_run(int diskfd)
       vu_buffer_add(buf, "</metrics>\n", -1);
       if (transports & VBD)
          metrics_disk_update(diskfd, buf);
+#ifdef WITH_XENSTORE
       if (transports & XENSTORE)
          metrics_xenstore_update(buf->content, ids, num_vms);
+#endif
       if (ids)
           free(ids);
       sleep(update_period);

@@ -3,9 +3,14 @@ INCLUDES = \
     -I../include
 
 sbin_PROGRAMS = vhostmd
-vhostmd_SOURCES = vhostmd.c util.c metric.c xenstore-update.c
+vhostmd_SOURCES = vhostmd.c util.c metric.c
 vhostmd_CFLAGS = $(LIBXML_CFLAGS)
 vhostmd_LDADD = -lm $(LIBXML_LIBS)
+
+if WITH_XENSTORE
+vhostmd_SOURCES += xenstore-update.c
+vhostmd_LDADD += -lxenstore
+endif
 
 if XENCTRL
 vhostmd_SOURCES += xenctrl-util.c

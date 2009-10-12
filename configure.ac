@@ -69,15 +69,14 @@ if test "x$xenctrl" = "xfalse"; then
   AM_CONDITIONAL(LIBVIRT, test x$libvirt = xtrue)
 fi
 
-# Configure argument to support using xenstore in domU utility 
+# Configure argument to support using xenstore
 AC_ARG_WITH([xenstore],
-            [  --with-xenstore      use xenstore in domU utility ],
+            [  --without-xenstore   disable use of xenstore],
   [case "${withval}" in
-   yes) with_xenstore=true
-        ;;
+   yes) with_xenstore=true;;
    no) with_xenstore=false;;
    *) AC_MSG_ERROR(bad value ${withval} for --with-xenstore) ;;
-  esac],[with_xenstore=false]) 
+  esac],[with_xenstore=true]) 
 AM_CONDITIONAL(WITH_XENSTORE, test x$with_xenstore = xtrue)
 
 AC_OUTPUT(vhostmd/Makefile
