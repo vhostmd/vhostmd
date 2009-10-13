@@ -5,7 +5,10 @@ INCLUDES = \
 noinst_PROGRAMS = test_static test_dyn
 
 test_static_SOURCES = main.c
-test_static_LDADD = ../libmetrics/libmetrics.la $(LIBXML_LIBS) -lxenstore
+test_static_LDADD = ../libmetrics/libmetrics.la $(LIBXML_LIBS)
+if WITH_XENSTORE
+test_static_LDADD += -lxenstore
+endif
 
 test_static_DEPENDENCIES = \
     ../libmetrics/libmetrics.h \
@@ -13,7 +16,10 @@ test_static_DEPENDENCIES = \
 
 test_dyn_SOURCES = main.c
 test_dyn_CFLAGS = -DUSE_DL_OPEN
-test_dyn_LDADD = ../libmetrics/libmetrics.la $(LIBXML_LIBS) -lxenstore
+test_dyn_LDADD = ../libmetrics/libmetrics.la $(LIBXML_LIBS)
+if WITH_XENSTORE
+test_dyn_LDADD += -lxenstore
+endif
 
 test_dyn_DEPENDENCIES = \
     ../libmetrics/libmetrics.h \
