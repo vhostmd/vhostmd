@@ -870,12 +870,16 @@ static int metrics_vms_get(vu_buffer *buf, int **ids)
    *ids = NULL;
    
    num_vms = vu_num_vms();
-   if (num_vms < 1)
+   if (num_vms == -1)
+      return -1;
+   if (num_vms == 0)
       return 0;
    
    *ids = calloc(num_vms, sizeof(int));
-   if (*ids == NULL)
-      return 0;
+   if (*ids == NULL) {
+      vu_log (VHOSTMD_ERR, "calloc: %m");
+      return -1;
+   }
 
    num_vms = vu_get_vms(*ids, num_vms);
    for (i = 0; i < num_vms; i++) {
@@ -911,7 +915,7 @@ static int vhostmd_run(int diskfd)
          vu_log(VHOSTMD_ERR, "Failed to collect host metrics "
                      "during update");
 
-      if ((num_vms = metrics_vms_get(buf, &ids)) == 0)
+      if ((num_vms = metrics_vms_get(buf, &ids)) == -1)
          vu_log(VHOSTMD_ERR, "Failed to collect vm metrics "
                      "during update");
 
