@@ -137,12 +137,24 @@ host and vm.
 
 Currently, the metric element contains 3 elements: name, action, and variable.
 The name element defines the metric's name.  The action element describes a
-command or pipeline of commands used to gather the metric.  For metrics of
-vm context, the tokens NAME, ID, and UUID may be used where these attributes
-of a VM are normally provided in a command.  When the metric is sampled, these
-tokens will be substituted with the actual name, ID, or UUID of the vm currently
-being sampled by vhostmd.  If the metric type is xml, action is expected to
-retrun valid metric XML as defined below in "XML Format of Content".
+command or pipeline of commands used to gather the metric.
+
+Any <action> element can contain the magic token CONNECT which is
+replaced with the string "--connect 'uri'" where uri is the libvirt
+connection URI (specified on the command line to vhostmd as the -c
+option).  If it wasn't specified, then the token CONNECT is
+substituted with the empty string.  This allows you to write virsh
+commands like this:
+
+ virsh -r CONNECT command ...
+
+For metrics of vm context, the tokens NAME, VMID, and UUID may be used
+where these attributes of a VM are normally provided in a command.
+When the metric is sampled, these tokens will be substituted with the
+actual name, ID, or UUID of the vm currently being sampled by vhostmd.
+
+If the metric type is xml, action is expected to return valid metric
+XML as defined below in "XML Format of Content".
 
 .SH Metrics Disk Format
 

@@ -30,31 +30,68 @@
 #include "util.h"
 #include "metric.h"
 
+/* If this returns NULL (for error), then 'str' has been freed. */
+static char *replace (char *str, const char *patt, const char *format, ...)
+{
+    char *repl = NULL;
+    char *old_str;
+    va_list args;
+    int r;
+
+    va_start (args, format);
+    r = vasprintf (&repl, format, args);
+    va_end (args);
+    if (r == -1) {
+	vu_log (VHOSTMD_ERR, "vasprintf failed: %m");
+	free (repl);
+	free (str);
+	return NULL;
+    }
+
+    old_str = str;
+    str = vu_str_replace (old_str, patt, repl);
+    free (repl);
+    if (str == NULL) {
+	vu_log (VHOSTMD_ERR, "vu_str_replace failed: %m");
+	free (old_str);
+	return NULL;
+    }
+    free (old_str);
+
+    return str;
+}
+
 static int metric_action_subst(metric *m, char **action)
 {
-   char *str;
-   char *temp;
-   char *domid;
+    char *temp;
 
-   if ((str = vu_str_replace(m->action, "NAME", m->vm->name)) == NULL)
-	   return -1;
+    temp = strdup (m->action);
+    if (temp == NULL) {
+	vu_log (VHOSTMD_ERR, "strdup: %m");
+	return -1;
+    }
 
-   temp = str;
-   if (asprintf(&domid, "%d", m->vm->id) == -1)
-	   return -1;
-   if ((str = vu_str_replace(temp, "VMID", domid)) == NULL)
-	   return -1;
-   free(domid);
-   free(temp);
+    if (libvirt_uri) {
+	temp = replace (temp, "CONNECT", "--connect '%s'", libvirt_uri);
+	if (temp == NULL) return -1;
+    } else {
+	temp = replace (temp, "CONNECT", "");
+	if (temp == NULL) return -1;
+    }
 
-   temp = str;
-   if ((str = vu_str_replace(temp, "UUID", m->vm->uuid)) == NULL)
-	   return -1;
-   free(temp);
+    if (m->ctx == METRIC_CONTEXT_VM) {
+	temp = replace (temp, "NAME", "%s", m->vm->name);
+	if (temp == NULL) return -1;
 
-   *action = str;
+	temp = replace (temp, "VMID", "%d", m->vm->id);
+	if (temp == NULL) return -1;
 
-   return 0;
+	temp = replace (temp, "UUID", "%s", m->vm->uuid);
+	if (temp == NULL) return -1;
+    }
+
+    *action = temp;
+    return 0;
 }
 
 /*
@@ -208,29 +245,27 @@ int metric_value_get(metric *m)
    FILE *fp = NULL;
    int ret = -1;
    size_t len;
+   char *cmd = NULL;
    
    if (m->pf) { 
 	   ret = m->pf(m);
 	   return ret;
    }
 
-   if (m->ctx == METRIC_CONTEXT_VM) {
-      char *cmd = NULL;
+   if (metric_action_subst(m, &cmd)) {
+       vu_log(VHOSTMD_ERR, "Failed action 'KEYWORD' substitution");
+       return ret;
+   }
 
-      if (metric_action_subst(m, &cmd)) {
-         vu_log(VHOSTMD_ERR, "Failed action 'KEYWORD' substitution");
-         return ret;
-      }
-      fp = popen(cmd, "r");
+   fp = popen (cmd, "r");
+
+   if (fp == NULL) {
+      vu_log(VHOSTMD_ERR, "Command failed: %s", cmd);
       free(cmd);
-   }
-   else {
-      fp = popen(m->action, "r");
-   }
-   
-   if (fp == NULL)
       return ret;
-      
+   }
+   free(cmd);
+   
    if (m->type == M_XML)
       len = 2048;
    else

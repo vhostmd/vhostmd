@@ -35,7 +35,7 @@ within the vm element.
     <metrics>
       <metric type="string" context="host">
         <name>HostName</name>
-        <action>virsh hostname | tr -d '[:space:]'</action>
+        <action>virsh CONNECT hostname | tr -d '[:space:]'</action>
       </metric>
       <metric type="string" context="host">
         <name>VirtualizationVendor</name>
@@ -83,12 +83,12 @@ within the vm element.
       </metric>
       <metric type="real64" context="host">
         <name>TotalCPUTime</name>
-        <action>virsh dominfo 0 | sed 's/: */:/' | \
+        <action>virsh CONNECT dominfo 0 | sed 's/: */:/' | \
                 gawk -F: '/CPU time/ {print $2;}'</action>
       </metric>
       <metric type="real64" context="vm">
         <name>TotalCPUTime</name>
-        <action>virsh dominfo NAME | sed 's/: */:/' | \
+        <action>virsh CONNECT dominfo NAME | sed 's/: */:/' | \
                 gawk -F: '/CPU time/ {print $2;}'</action>
       </metric>
     </metrics>
