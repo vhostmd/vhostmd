@@ -28,31 +28,28 @@
 
 static virConnectPtr conn = NULL;
 
+static int
+do_connect (void)
+{
+    if (conn == NULL) {
+	conn = virConnectOpenReadOnly (NULL);
+	if (conn == NULL) {
+	    vu_log (VHOSTMD_ERR, "Unable to open libvirt connection");
+	    return -1;
+	}
+    }
+    return 0;
+}
+
 int vu_num_vms(void)
 {
-   if (conn == NULL)
-      conn = virConnectOpen(NULL);
-      
-   if (conn == NULL) {
-      conn = virConnectOpenReadOnly(NULL);
-      if (conn == NULL) {
-         vu_log(VHOSTMD_ERR, "Unable to open libvirt connection");
-         return -1;
-      }
-   }
-   
+   if (do_connect () == -1) return -1;
    return virConnectNumOfDomains(conn);
 }
 
 int vu_get_vms(int *ids, int max_ids)
 {
-   if (conn == NULL)
-      conn = virConnectOpen(NULL);
-      
-   if (conn == NULL) {
-      vu_log(VHOSTMD_ERR, "Unable to open libvirt connection");
-      return -1;
-   }
+   if (do_connect () == -1) return -1;
    
    return (virConnectListDomains(conn, ids, max_ids));
 }
@@ -64,19 +61,13 @@ vu_vm *vu_get_vm(int id)
    virDomainPtr dom = NULL;
    char uuid[VIR_UUID_STRING_BUFLEN];
    
+   if (do_connect () == -1) return NULL;
+
    vm = calloc(1, sizeof(vu_vm));
    if (vm == NULL)
       return NULL;
    
    vm->id = id;
-   
-   if (conn == NULL)
-      conn = virConnectOpen(NULL);
-   
-   if (conn == NULL) {
-      vu_log(VHOSTMD_ERR, "Unable to open libvirt connection");
-      goto error;
-   }
    
    dom = virDomainLookupByID(conn, id);
    if (dom == NULL) {
