@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
+#include <pwd.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -947,6 +948,7 @@ static void usage(const char *argv0)
    -d | --no-daemonize    Process will not daemonize - useful for debugging.\n\
    -f | --config <file>   Configuration file.\n\
    -p | --pid-file <file> PID file.\n\
+   -u | --user <user>     Drop root privs and run as <user>.\n\
    \n\
    Host metrics gathering daemon:\n\
    \n",
@@ -962,21 +964,23 @@ int main(int argc, char *argv[])
    int no_daemonize = 0;
    int ret = 1;
    int mdisk_fd = -1;
+   const char *user = NULL;
 
    struct option opts[] = {
       { "verbose", no_argument, &verbose, 1},
-        { "no-daemonize", no_argument, &no_daemonize, 1},
-        { "config", required_argument, NULL, 'f'},
-        { "pid-file", required_argument, NULL, 'p'},
-        { "help", no_argument, NULL, '?' },
-        {0, 0, 0, 0}
+      { "no-daemonize", no_argument, &no_daemonize, 1},
+      { "config", required_argument, NULL, 'f'},
+      { "pid-file", required_argument, NULL, 'p'},
+      { "user", required_argument, NULL, 'u'},
+      { "help", no_argument, NULL, '?' },
+      {0, 0, 0, 0}
    };
 
    while (1) {
       int optidx = 0;
       int c;
 
-      c = getopt_long(argc, argv, "df:p:v", opts, &optidx);
+      c = getopt_long(argc, argv, "df:p:u:v", opts, &optidx);
 
       if (c == -1)
          break;
@@ -997,6 +1001,9 @@ int main(int argc, char *argv[])
          case 'p':
             pfile = optarg;
             break;
+         case 'u':
+	    user = optarg;
+	    break;
          case '?':
             usage(argv[0]);
             return 2;
@@ -1068,6 +1075,39 @@ int main(int argc, char *argv[])
    if ((mdisk_fd = metrics_disk_create()) < 0) {
       vu_log(VHOSTMD_ERR, "Failed to create metrics disk %s", mdisk_path);
       goto out;
+   }
+
+   /* Drop root privileges if requested.  Note: We do this after
+    * opening the metrics disk, parsing the config file, etc.
+    */
+   if (user) {
+       struct passwd *pw;
+
+       errno = 0;
+       pw = getpwnam (user);
+       if (!pw) {
+	   vu_log (VHOSTMD_ERR, "No entry in password file for user %s: %m",
+		   user);
+	   goto out;
+       }
+
+       if (pw->pw_uid == 0 || pw->pw_gid == 0) {
+	   vu_log (VHOSTMD_ERR, "Cannot switch to root using the '-u' command line flag.");
+	   goto out;
+       }
+
+       if (setgid (pw->pw_gid) == -1) {
+	   vu_log (VHOSTMD_ERR, "setgid: %d: %m", pw->pw_gid);
+	   goto out;
+       }
+
+       if (setuid (pw->pw_uid) == -1) {
+	   vu_log (VHOSTMD_ERR, "setuid: %d: %m", pw->pw_uid);
+	   goto out;
+       }
+
+       vu_log (VHOSTMD_INFO, "Switched to uid:gid %d:%d",
+	       pw->pw_uid, pw->pw_gid);
    }
 
    ret = vhostmd_run(mdisk_fd);
