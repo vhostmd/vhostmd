@@ -62,7 +62,8 @@ void vu_log_close(void);
 /* 
  * Logging function.
  */
-void vu_log(int priority, const char *fmt, ...);
+void vu_log(int priority, const char *fmt, ...)
+  __attribute__((format (printf, 2, 3)));
 
 /*
  * Create buffer capable of holding len content.
@@ -82,7 +83,8 @@ void vu_buffer_add(vu_buffer *buf, const char *str, int len);
 /*
  * Do a formatted print to buffer.
  */
-void vu_buffer_vsprintf(vu_buffer *buf, const char *format, ...);
+void vu_buffer_vsprintf(vu_buffer *buf, const char *format, ...)
+  __attribute__((format (printf, 2, 3)));
 
 /*
  * Erase buffer, setting use to 0 and clearing content.
