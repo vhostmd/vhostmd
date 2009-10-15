@@ -20,6 +20,8 @@
  * Preliminary, this could be done better
  */
 
+#include <config.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <xenctrl.h>

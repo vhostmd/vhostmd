@@ -3,12 +3,14 @@ AC_INIT(Virtual Host Metrics Daemon, 0.3, jfehlig@novell.com, vhostmd)
 AC_CONFIG_SRCDIR(vhostmd/vhostmd.c)
 AC_CONFIG_HEADERS([config.h])
 
+AC_GNU_SOURCE
+
 AC_PROG_LIBTOOL
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h limits.h paths.h stdlib.h string.h syslog.h unistd.h])
 
-CFLAGS="-Wall $CFLAGS -D_GNU_SOURCE"
+CFLAGS="-Wall $CFLAGS"
 
 # Checks for library functions.
 AC_FUNC_FORK

@@ -18,6 +18,8 @@
  * Author: Jim Fehlig <jfehlig@novell.com>
  */
 
+#include <config.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <paths.h>

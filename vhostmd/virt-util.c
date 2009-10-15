@@ -18,6 +18,8 @@
  * Author: Jim Fehlig <jfehlig@novell.com>
  */
 
+#include <config.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <libvirt/libvirt.h>

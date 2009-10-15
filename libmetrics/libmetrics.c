@@ -18,9 +18,7 @@
  * Author: Pat Campbell <plc@novell.com>
  */
 
-#ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
-#endif
+#include <config.h>
 
 #include <stdio.h>
 #include <string.h>

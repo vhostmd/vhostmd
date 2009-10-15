@@ -19,6 +19,8 @@
  *         Jim Fehlig <jfehlig@novell.com>
  */
 
+#include <config.h>
+
 #include <stdio.h>
 
 #include "libmetrics.h"

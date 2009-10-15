@@ -19,6 +19,8 @@
  *         Jim Fehlig <jfehlig@novell.com>
  */
 
+#include <config.h>
+
 #include "libmetrics.h"
 
 int get_host_memory_metrics(memory_metrics *rec)
