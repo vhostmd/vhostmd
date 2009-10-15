@@ -945,6 +945,7 @@ static void usage(const char *argv0)
    \n\
    Options:\n\
    -v | --verbose         Verbose messages.\n\
+   -c | --connect <uri>   Set the libvirt URI.\n\
    -d | --no-daemonize    Process will not daemonize - useful for debugging.\n\
    -f | --config <file>   Configuration file.\n\
    -p | --pid-file <file> PID file.\n\
@@ -972,6 +973,7 @@ int main(int argc, char *argv[])
       { "config", required_argument, NULL, 'f'},
       { "pid-file", required_argument, NULL, 'p'},
       { "user", required_argument, NULL, 'u'},
+      { "connect", required_argument, NULL, 'c'},
       { "help", no_argument, NULL, '?' },
       {0, 0, 0, 0}
    };
@@ -980,7 +982,7 @@ int main(int argc, char *argv[])
       int optidx = 0;
       int c;
 
-      c = getopt_long(argc, argv, "df:p:u:v", opts, &optidx);
+      c = getopt_long(argc, argv, "c:df:p:u:v", opts, &optidx);
 
       if (c == -1)
          break;
@@ -1003,6 +1005,9 @@ int main(int argc, char *argv[])
             break;
          case 'u':
 	    user = optarg;
+	    break;
+         case 'c':
+	    libvirt_uri = optarg;
 	    break;
          case '?':
             usage(argv[0]);

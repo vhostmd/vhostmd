@@ -47,6 +47,10 @@ typedef struct _vu_vm
    char *uuid;
 } vu_vm;
 
+/* The libvirt URI to connect to (-c argument on the command line).  If
+ * not set, this will be NULL.
+ */
+extern const char *libvirt_uri;
 
 /*
  * Init logging interface.  If running as daemon messages

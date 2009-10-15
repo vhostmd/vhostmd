@@ -19,6 +19,12 @@ Verbose messages
 .B \-d, --no-daemonize
 Process will not daemonize
 .TP
+.B \-c, --connect <uri>
+Set the libvirt URI.  If unspecified then we connect to the default
+libvirt hypervisor.  It is recommended that you specify this since
+libvirt's method for choosing the default hypervisor can give
+unexpected results.
+.TP
 .B \-u, --user <user>
 Drop root privileges and run as the named non-root user.
 .TP

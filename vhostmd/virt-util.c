@@ -28,13 +28,16 @@
 
 static virConnectPtr conn = NULL;
 
+const char *libvirt_uri = NULL;
+
 static int
 do_connect (void)
 {
     if (conn == NULL) {
-	conn = virConnectOpenReadOnly (NULL);
+	conn = virConnectOpenReadOnly (libvirt_uri);
 	if (conn == NULL) {
-	    vu_log (VHOSTMD_ERR, "Unable to open libvirt connection");
+	    vu_log (VHOSTMD_ERR, "Unable to open libvirt connection to %s",
+		    libvirt_uri ? libvirt_uri : "default hypervisor");
 	    return -1;
 	}
     }
