@@ -466,6 +466,10 @@ static int get_dom_id()
     unsigned int len;
 
     xsh = xs_domain_open();
+    if (xsh == NULL) {
+        libmsg("xs_domain_open: cannot open xenstore\n");
+        return -1;
+    }
     domid = xs_read(xsh, XBT_NULL, "domid", &len);
     if (domid) {
         domID = atoi(domid);
