@@ -111,19 +111,23 @@ int main(int argc, char *argv[])
 
 #ifdef WITH_XENSTORE
    if (xenstore) {
-       dump_xenstore_metrics(dfile);
+       if (dump_xenstore_metrics(dfile) == -1)
+	   exit (1);
    }
    if (vbd) {
-       dump_metrics(dfile);
+       if (dump_metrics(dfile) == -1)
+	   exit (1);
    }
    /* Try disk first and if not found try xenstore */
    if (vbd == 0 && xenstore == 0) {
        if (dump_metrics(dfile) == -1)
-           dump_xenstore_metrics(dfile);
+           if (dump_xenstore_metrics(dfile) == -1)
+	       exit (1);
    }
 #else
-   dump_metrics(dfile);
+   if (dump_metrics(dfile) == -1)
+       exit (1);
 #endif
 
-   return 0;
+   exit (0);
 }
