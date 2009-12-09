@@ -183,6 +183,9 @@ static int daemonize(void)
          if (close(stdoutfd) < 0)
             goto cleanup;
          stdoutfd = -1;
+
+         if (chdir ("/") == -1)
+            goto cleanup;
          
          if (setsid() < 0)
             goto cleanup;
