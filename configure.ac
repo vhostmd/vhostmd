@@ -24,7 +24,7 @@ AC_CONFIG_FILES([Makefile])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
-AC_PROG_CC
+AM_PROG_CC_C_O
 
 AC_C_CONST
 AC_PROG_INSTALL
