@@ -55,7 +55,8 @@ AM_CONDITIONAL(LIBXENSTAT, test x$libxenstat = xtrue)
 AC_ARG_ENABLE([xenctrl],
 [  --enable-xenctrl      use xenctrl specific vm enumeration instead of libvirt],
   [case "${enableval}" in
-   yes) xenctrl=true 
+   yes) xenctrl=true
+        CFLAGS="$CFLAGS -DXENCTRL"
         ;;
    no) xenctrl=false ;;
    *) AC_MSG_ERROR(bad value ${enableval} for --enable-xenctrl) ;;
