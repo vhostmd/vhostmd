@@ -241,7 +241,7 @@ void vu_buffer_erase(vu_buffer *buf)
 unsigned int vu_buffer_checksum(vu_buffer *buf)
 {
    if (buf) {
-      int i;
+      unsigned int i;
       unsigned int chksum = 0;
 
       for(i = 0; i < buf->size; i++) 
@@ -371,7 +371,7 @@ unsigned int vu_str_checksum(char *buf)
 {
    if (buf) {
       size_t len = strlen(buf);
-      int i;
+      unsigned int i;
       unsigned int chksum = 0;
 
       for(i = 0; i < len; i++) 

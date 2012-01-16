@@ -187,7 +187,8 @@ out:
 int metrics_xenstore_update(char *mbuffer, int *ids, int num_vms)
 {
     char *buf = NULL, *path, *uuid = NULL;
-    unsigned int i, len;
+    int i;
+    unsigned int len;
     char *cp;
     struct xs_handle *xsh = NULL;
     vu_buffer *mbuf = NULL;

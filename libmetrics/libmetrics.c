@@ -305,7 +305,7 @@ odirect_read (int fd, void *buf, size_t offset, size_t size)
     return -1;
   }
 
-  if (read (fd, mem, n) != n) {
+  if (read (fd, mem, n) != (ssize_t) n) {
     free (mem);
     return -1;
   }
