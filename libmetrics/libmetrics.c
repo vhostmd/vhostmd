@@ -718,13 +718,15 @@ int dump_xenstore_metrics(const char *dest_file)
 
     if ((domid = get_dom_id()) == -1) {
         libmsg("Unable to derive domID.\n" );
-        return -1;
+        ret = -1;
+        goto out;
     }
 
     xsh = xs_domain_open();
     if (xsh == NULL) {
         libmsg("xs_domain_open() error. errno: %d.\n", errno);
-        return -1;
+        ret = -1;
+        goto out;
     }
 
     path = xs_get_domain_path(xsh, domid);
@@ -738,39 +740,38 @@ int dump_xenstore_metrics(const char *dest_file)
     if (metrics == NULL) {
         libmsg("xs_read(): uuid get error. %s.\n", buf);
         ret = -1;
+        goto out;
     }
-    else {
-		pctxt = xmlNewParserCtxt();
-		if (!pctxt || !pctxt->sax) {
-			libmsg("%s(): failed to create parser \n", __func__);
-			goto out;
-		}
 
-		doc = xmlCtxtReadMemory(pctxt, metrics,
-				strlen(metrics), "mdisk.xml", NULL,
-				XML_PARSE_NOENT | XML_PARSE_NONET |
-				XML_PARSE_NOWARNING);
-		if (!doc) {
-			libmsg("%s(): libxml failed to xenstore metrics attribute\n", __func__);
-			goto out;
-		}
-		xmlDocFormatDump(fp, doc, 1);
-	}
+    pctxt = xmlNewParserCtxt();
+    if (!pctxt || !pctxt->sax) {
+      libmsg("%s(): failed to create parser \n", __func__);
+      ret = -1;
+      goto out;
+    }
+
+    doc = xmlCtxtReadMemory(pctxt, metrics,
+                            strlen(metrics), "mdisk.xml", NULL,
+                            XML_PARSE_NOENT | XML_PARSE_NONET |
+                            XML_PARSE_NOWARNING);
+    if (!doc) {
+      libmsg("%s(): libxml failed to xenstore metrics attribute\n", __func__);
+      ret = -1;
+      goto out;
+    }
+    xmlDocFormatDump(fp, doc, 1);
 
 out:
-    if (fp && fp != stderr)
+    if (fp && fp != stdout)
         fclose(fp);
-	if (doc)
-		xmlFreeDoc(doc);
-	if (pctxt)
-		xmlFreeParserCtxt(pctxt);
-    if (path)
-        free(path);
-    if (buf)
-        free(buf);
-    if (metrics)
-        free(metrics);
-    return 0;
+    if (doc)
+      xmlFreeDoc(doc);
+    if (pctxt)
+      xmlFreeParserCtxt(pctxt);
+    free(path);
+    free(buf);
+    free(metrics);
+    return ret;
 }
 #endif
 
