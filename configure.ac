@@ -1,4 +1,4 @@
-AC_INIT(Virtual Host Metrics Daemon, 0.4, jfehlig@novell.com, vhostmd)
+AC_INIT(Virtual Host Metrics Daemon, 0.5, jfehlig@novell.com, vhostmd)
 
 AC_CONFIG_SRCDIR(vhostmd/vhostmd.c)
 AC_CONFIG_HEADERS([config.h])
