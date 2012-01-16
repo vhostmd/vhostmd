@@ -31,7 +31,7 @@ AC_PROG_INSTALL
 
 PKG_CHECK_MODULES([LIBXML], [libxml-2.0])
 
-DEBUG_CFLAGS="-g -O0 -Werror -Wimplicit -Wreturn-type -Wunused -Wformat -DENABLE_DEBUG "
+DEBUG_CFLAGS="-g -O0 -Werror -Wextra -Wimplicit -Wreturn-type -Wunused -Wformat -DENABLE_DEBUG "
 # Add a configure argument to support debug mode
 AC_ARG_ENABLE([debug],
 [  --enable-debug     enable debugging mode],
