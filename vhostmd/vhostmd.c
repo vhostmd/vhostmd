@@ -107,7 +107,8 @@ static int transports = 0;
  * Basic daemon support functions
  *********************************************************************/
 
-static void sig_handler(int sig, siginfo_t *siginfo, void *context)
+static void sig_handler(int sig, siginfo_t *siginfo ATTRIBUTE_UNUSED,
+                        void *context ATTRIBUTE_UNUSED)
 {
    switch (sig) {
       case SIGINT:
@@ -230,7 +231,8 @@ static int daemonize(void)
  *********************************************************************/
 
 /* Parse a XML group metric node and return success indication */
-static int parse_group_metric(xmlDocPtr xml, xmlXPathContextPtr ctxt, xmlNodePtr node, metric *mdef)
+static int parse_group_metric(xmlDocPtr xml ATTRIBUTE_UNUSED,
+                              xmlXPathContextPtr ctxt, xmlNodePtr node, metric *mdef)
 {
    xmlXPathObjectPtr obj = NULL;
    xmlChar *path = NULL;

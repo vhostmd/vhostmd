@@ -24,6 +24,11 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
+#ifdef __GNUC__
+#define ATTRIBUTE_UNUSED __attribute__((unused))
+#else
+#define ATTRIBUTE_UNUSED
+#endif
 
 typedef enum {
    VHOSTMD_ERR,
