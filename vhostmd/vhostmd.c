@@ -34,6 +34,7 @@
 #include <getopt.h>
 #include <signal.h>
 #include <pwd.h>
+#include <grp.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -1113,6 +1114,11 @@ int main(int argc, char *argv[])
        if (setgid (pw->pw_gid) == -1) {
 	   vu_log (VHOSTMD_ERR, "setgid: %d: %m", pw->pw_gid);
 	   goto out;
+       }
+
+       if (initgroups (user, pw->pw_gid) == -1) {
+           vu_log (VHOSTMD_ERR, "initgroups: %m");
+           goto out;
        }
 
        if (setuid (pw->pw_uid) == -1) {
