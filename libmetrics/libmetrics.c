@@ -571,7 +571,7 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
    metric *lmdef;
    uint32_t sum;
    int extra_len = 0;
-   int ret = 0;
+   int ret = -1;
 
    *mdef = NULL;
 
