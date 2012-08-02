@@ -48,7 +48,7 @@ AC_ARG_ENABLE([libxenstat],
         ;;
    no) libxenstat=false ;;
    *) AC_MSG_ERROR(bad value ${enableval} for --enable-libxenstat) ;;
-  esac],[libxenstat=false]) 
+  esac],[AC_CHECK_HEADER(xenstat.h, libxenstat=true, libxenstat=false)])
 AM_CONDITIONAL(LIBXENSTAT, test x$libxenstat = xtrue)
 
 # Configure argument to support using xenctrl library for vm enumeration 
@@ -60,7 +60,7 @@ AC_ARG_ENABLE([xenctrl],
         ;;
    no) xenctrl=false ;;
    *) AC_MSG_ERROR(bad value ${enableval} for --enable-xenctrl) ;;
-  esac],[xenctrl=false]) 
+  esac],[AC_CHECK_HEADER(xenctrl.h, xenctrl=true, xenctrl=false,)])
 AM_CONDITIONAL(XENCTRL, test x$xenctrl = xtrue)
 
 libvirt=false
@@ -79,7 +79,7 @@ AC_ARG_WITH([xenstore],
    yes) with_xenstore=true;;
    no) with_xenstore=false;;
    *) AC_MSG_ERROR(bad value ${withval} for --with-xenstore) ;;
-  esac],[with_xenstore=true]) 
+  esac],[AC_CHECK_HEADER(xs.h, with_xenstore=true)])
 AM_CONDITIONAL(WITH_XENSTORE, test x$with_xenstore = xtrue)
 
 AC_OUTPUT(vhostmd/Makefile
