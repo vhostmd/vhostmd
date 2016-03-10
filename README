@@ -15,6 +15,15 @@ surfaced read-only to virtual machines using tools provided by the host's
 virtualization platform.
 
 
+Contact
+-------
+
+All comments / suggestions / patches should be directed to the
+virt-tools-list mailing list:
+
+  http://www.redhat.com/mailman/listinfo/virt-tools-list
+
+
 Usage
 -----
 
