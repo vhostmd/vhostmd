@@ -32,7 +32,7 @@ vhostmd [options]
   Options:
    -v | --verbose         Verbose messages
    -d | --no-daemonize    Process will not daemonize
-   -f | --config <file>   Configuration file (/etc/vhostmd.xml default)
+   -f | --config <file>   Configuration file (/etc/vhostmd/vhostmd.conf default)
    -p | --pid-file <file> PID file (/var/run/vhostmd.pid default)
 
 
