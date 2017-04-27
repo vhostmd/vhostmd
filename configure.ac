@@ -1,4 +1,4 @@
-AC_INIT(Virtual Host Metrics Daemon, 0.5, jfehlig@novell.com, vhostmd)
+AC_INIT(Virtual Host Metrics Daemon, 0.5, jfehlig@suse.com, vhostmd)
 
 AC_CONFIG_SRCDIR(vhostmd/vhostmd.c)
 AC_CONFIG_HEADERS([config.h])
@@ -81,6 +81,28 @@ AC_ARG_WITH([xenstore],
    *) AC_MSG_ERROR(bad value ${withval} for --with-xenstore) ;;
   esac],[AC_CHECK_HEADER(xs.h, with_xenstore=true)])
 AM_CONDITIONAL(WITH_XENSTORE, test x$with_xenstore = xtrue)
+
+# Configure argument to support type of init system
+AC_ARG_WITH([init_script],
+  [AS_HELP_STRING([--with-init-script],
+    [Type of init script to install: systemv, systemd, check @<:@default=check@:>@])],
+  [],
+  [with_init_script=check])
+init_systemv=no
+init_systemd=no
+if test "$with_init_script" = check && type systemctl >/dev/null 2>&1; then
+   init_systemd=yes
+else
+   init_systemv=yes
+fi
+case "${with_init_script}" in
+   systemv) init_systemv=yes;;
+   systemd) init_systemd=yes;;
+   check) ;;
+   *) AC_MSG_ERROR([Unknown initscript type $with_init_script]);;
+esac
+AM_CONDITIONAL([INIT_SCRIPT_SYSTEMV], test "$init_systemv" = "yes")
+AM_CONDITIONAL([INIT_SCRIPT_SYSTEMD], test "$init_systemd" = "yes")
 
 AC_OUTPUT(vhostmd/Makefile
           include/Makefile
