@@ -1,0 +1,13 @@
+[Unit]
+Description=Daemon for collecting virutalization host metrics
+After=libvirtd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/vhostmd
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
+Documentation=man:vhostmd(8)
+
+[Install]
+WantedBy=multi-user.target
