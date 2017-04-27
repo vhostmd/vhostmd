@@ -4,6 +4,7 @@ AC_CONFIG_SRCDIR(vhostmd/vhostmd.c)
 AC_CONFIG_HEADERS([config.h])
 
 AC_GNU_SOURCE
+AM_INIT_AUTOMAKE
 
 AC_PROG_LIBTOOL
 
@@ -21,7 +22,6 @@ AC_SUBST(topdir)
 
 AC_CONFIG_FILES([Makefile])
 
-AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AM_PROG_CC_C_O
