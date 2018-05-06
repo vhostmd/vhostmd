@@ -11,7 +11,7 @@
 # Required-Stop:     $remote_fs $null
 # Should-Stop:       $null
 # Default-Stop:      0 1 2 4 6
-# Short-Description: daemon for collecting virutalization host metrics
+# Short-Description: daemon for collecting virtualization host metrics
 # Description:       This is a daemon for collecting virtualization host
 #                    metrics and writing them to a file-backed disk.
 ### END INIT INFO
