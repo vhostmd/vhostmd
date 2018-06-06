@@ -979,9 +979,7 @@ int main(int argc, char *argv[])
       { "config", required_argument, NULL, 'f'},
       { "pid-file", required_argument, NULL, 'p'},
       { "user", required_argument, NULL, 'u'},
-#ifndef XENCTRL
       { "connect", required_argument, NULL, 'c'},
-#endif
       { "help", no_argument, NULL, '?' },
       {0, 0, 0, 0}
    };
@@ -1014,11 +1012,9 @@ int main(int argc, char *argv[])
          case 'u':
 	    user = optarg;
 	    break;
-#ifndef XENCTRL
          case 'c':
 	    libvirt_uri = optarg;
 	    break;
-#endif
          case '?':
             usage(argv[0]);
             return 2;

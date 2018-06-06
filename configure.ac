@@ -51,26 +51,7 @@ AC_ARG_ENABLE([libxenstat],
   esac],[AC_CHECK_HEADER(xenstat.h, libxenstat=true, libxenstat=false)])
 AM_CONDITIONAL(LIBXENSTAT, test x$libxenstat = xtrue)
 
-# Configure argument to support using xenctrl library for vm enumeration 
-AC_ARG_ENABLE([xenctrl],
-[  --enable-xenctrl      use xenctrl specific vm enumeration instead of libvirt],
-  [case "${enableval}" in
-   yes) xenctrl=true
-        CFLAGS="$CFLAGS -DXENCTRL"
-        ;;
-   no) xenctrl=false ;;
-   *) AC_MSG_ERROR(bad value ${enableval} for --enable-xenctrl) ;;
-  esac],[AC_CHECK_HEADER(xenctrl.h, xenctrl=true, xenctrl=false,)])
-AM_CONDITIONAL(XENCTRL, test x$xenctrl = xtrue)
-
-libvirt=false
-AM_CONDITIONAL(LIBVIRT, test x$libvirt = xtrue)
-# Default to libvirt for vm enumeration if no other enabled
-if test "x$xenctrl" = "xfalse"; then
-  libvirt=true
-  PKG_CHECK_MODULES([LIBVIRT], [libvirt])
-  AM_CONDITIONAL(LIBVIRT, test x$libvirt = xtrue)
-fi
+PKG_CHECK_MODULES([LIBVIRT], [libvirt])
 
 # Configure argument to support using xenstore
 AC_ARG_WITH([xenstore],

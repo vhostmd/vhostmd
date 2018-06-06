@@ -71,10 +71,6 @@ static int metric_action_subst(metric *m, char **action)
 	return -1;
     }
 
-#ifdef XENCTRL
-	temp = replace (temp, "CONNECT", "");
-	if (temp == NULL) return -1;
-#else /* LIBVIRT used instead */
     if (libvirt_uri) {
 	temp = replace (temp, "CONNECT", "--connect '%s'", libvirt_uri);
 	if (temp == NULL) return -1;
@@ -82,7 +78,6 @@ static int metric_action_subst(metric *m, char **action)
 	temp = replace (temp, "CONNECT", "");
 	if (temp == NULL) return -1;
     }
-#endif
 
     if (m->ctx == METRIC_CONTEXT_VM) {
 	temp = replace (temp, "NAME", "%s", m->vm->name);
