@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
-#include <xs.h>
+#include <xenstore.h>
 
 #include "util.h"
 #include "metric.h"

@@ -31,7 +31,7 @@
 #include <arpa/inet.h>
 #include <libxml/xpath.h>
 #ifdef WITH_XENSTORE
-#include <xs.h>
+#include <xenstore.h>
 #endif
 
 #include "libmetrics.h"

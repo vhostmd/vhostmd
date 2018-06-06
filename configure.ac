@@ -48,7 +48,7 @@ AC_ARG_WITH([xenstore],
    yes) with_xenstore=true;;
    no) with_xenstore=false;;
    *) AC_MSG_ERROR(bad value ${withval} for --with-xenstore) ;;
-  esac],[AC_CHECK_HEADER(xs.h, with_xenstore=true)])
+  esac],[AC_CHECK_HEADER(xenstore.h, with_xenstore=true)])
 AM_CONDITIONAL(WITH_XENSTORE, test x$with_xenstore = xtrue)
 
 # Configure argument to support type of init system
