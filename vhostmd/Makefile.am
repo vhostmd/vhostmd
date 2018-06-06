@@ -12,11 +12,6 @@ vhostmd_SOURCES += xenstore-update.c
 vhostmd_LDADD += -lxenstore
 endif
 
-if LIBXENSTAT
-vhostmd_SOURCES += xen-metrics.c
-vhostmd_LDADD += ../xenstat/libxenstat/src/libxenstat.a
-endif
-
 valgrind:
 	$(MAKE) CHECKER='valgrind --quiet --leak-check=full --suppressions=$(srcdir)/.valgrind.supp' tests
 

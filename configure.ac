@@ -39,18 +39,6 @@ AC_ARG_ENABLE([debug],
          CFLAGS="$CFLAGS $DEBUG_CFLAGS"
   ])
 
-# Add a configure argument to support using xen library, libxenstat 
-AC_ARG_ENABLE([libxenstat],
-[  --enable-libxenstat     enable libxenstat usage],
-  [case "${enableval}" in
-   yes) libxenstat=true 
-        CFLAGS="$CFLAGS -DLIBXENSTAT"
-        ;;
-   no) libxenstat=false ;;
-   *) AC_MSG_ERROR(bad value ${enableval} for --enable-libxenstat) ;;
-  esac],[AC_CHECK_HEADER(xenstat.h, libxenstat=true, libxenstat=false)])
-AM_CONDITIONAL(LIBXENSTAT, test x$libxenstat = xtrue)
-
 PKG_CHECK_MODULES([LIBVIRT], [libvirt])
 
 # Configure argument to support using xenstore

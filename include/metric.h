@@ -71,10 +71,6 @@ int metric_value_get(metric *def);
 
 int metric_xml(metric *m, vu_buffer *buf);
 
-#ifdef LIBXENSTAT
-int xen_metrics(metric **user_metrics);
-#endif
-
 #ifdef WITH_XENSTORE
 int metrics_xenstore_update(char *buffer, int *ids, int num_vms);
 #endif

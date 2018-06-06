@@ -1077,12 +1077,6 @@ int main(int argc, char *argv[])
       goto out;
    }
 
-#ifdef LIBXENSTAT
-   if (xen_metrics(&metrics)) {
-      vu_log(VHOSTMD_ERR, "Unable to load xen specific metrics, ignoring");
-   }
-#endif
-      
    if ((mdisk_fd = metrics_disk_create()) < 0) {
       vu_log(VHOSTMD_ERR, "Failed to create metrics disk %s", mdisk_path);
       goto out;
