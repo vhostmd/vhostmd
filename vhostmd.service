@@ -1,5 +1,5 @@
 [Unit]
-Description=Daemon for collecting virutalization host metrics
+Description=Daemon for collecting virtualization host metrics
 After=libvirtd.service
 Documentation=man:vhostmd(8)
 
