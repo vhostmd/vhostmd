@@ -59,10 +59,12 @@ AC_ARG_WITH([init_script],
   [with_init_script=check])
 init_systemv=no
 init_systemd=no
-if test "$with_init_script" = check && type systemctl >/dev/null 2>&1; then
-   init_systemd=yes
-else
-   init_systemv=yes
+if test "$with_init_script" = check; then
+   if type systemctl >/dev/null 2>&1; then
+      init_systemd=yes
+   else
+      init_systemv=yes
+   fi
 fi
 case "${with_init_script}" in
    systemv) init_systemv=yes;;
