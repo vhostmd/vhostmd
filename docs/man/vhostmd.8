@@ -13,6 +13,9 @@ provides a "metrics communication channel" between a host and its hosted virtual
 vhostmd will periodically write metrics to a disk.  The metrics to write, how often, and where to write them are all adjustable via the /etc/vhostmd/vhostmd.conf configuration file.  The disk can then be surfaced read-only to virtual machines using tools provided by the host's virtualization platform.
 .SH OPTIONS
 .TP
+.B \-h, --help
+Display help and exit
+.TP
 .B \-v, --verbose
 Verbose messages
 .TP
