@@ -18,6 +18,12 @@ A metric's value is set to the output produced by executing its action.
 the vm currently under inspection is substituted for NAME.  Only useful
 within the vm element.
 
+NOTE - 'action' must be a valid shell builtin, script or external
+command found in the path specified by the global <path> element.
+When chaining commands, '&', '<' and '>' are reserved characters,
+therefore '&amp;', '&lt;' and '&gt;' must be used instead. For example,
+the logical && operator must be replaced with "&amp;&amp;".
+
 -->
 
   <vhostmd>
@@ -28,52 +34,75 @@ within the vm element.
         <size unit="k">256</size>
       </disk>
       <update_period>5</update_period>
-      <path>/usr/bin:/usr/sbin:/usr/share/vhostmd/scripts</path>
+      <path>/usr/sbin:/sbin:/usr/bin:/bin:/usr/share/vhostmd/scripts</path>
       <transport>vbd</transport>
       <!-- <transport>xenstore</transport> -->
     </globals>
     <metrics>
       <metric type="string" context="host">
         <name>HostName</name>
-        <action>virsh CONNECT hostname | tr -d '[:space:]'</action>
+        <action>
+          virsh CONNECT hostname | tr -d '[:space:]'
+        </action>
       </metric>
       <metric type="string" context="host">
         <name>VirtualizationVendor</name>
-        <action>/bin/rpm -q --info xen | grep Vendor: | \
-                awk '{print substr($0, index($0,$5)) }'</action>
+        <action>
+          [ -f /proc/xen/privcmd ] &amp;&amp; RPM="xen" || RPM="libvirt"; \
+          rpm -q --queryformat "%{VENDOR}\n" $RPM | sort -u | sed -e 's/&lt;.*//' -e 's/ *$//'
+        </action>
       </metric>
       <metric type="string" context="host">
         <name>VirtualizationProductInfo</name>
-        <action>xm info | gawk '/^xen_(major|minor|extra)/ {print $3}' | \
-                tr -d . | tr '[:space:]' .</action>
+        <action>
+          [ -f /proc/xen/privcmd ] &amp;&amp; xl info | \
+          awk '/^xen_(major|minor|extra)/ {print $3}' | sed -e 'N;s/\n/./' -e 'N;s/\n//' || \
+          rpm -q --queryformat "%{VERSION}-%{RELEASE}\n" libvirt | sort -u
+        </action>
       </metric>
       <metric type="uint32" context="host">
         <name>TotalPhyCPUs</name>
-        <action>xm info | gawk '/^nr_cpus/ {print $3}'</action>
+        <action>
+          virsh nodeinfo | awk '/^CPU\(s\)/ {print $2}'
+        </action>
       </metric>
       <metric type="uint32" context="host">
         <name>NumCPUs</name>
-        <action>xm info | gawk '/^nr_cpus/ {print $3}'</action>
+        <action>
+          virsh nodeinfo | awk '/^CPU\(s\)/ {print $2}'
+        </action>
       </metric>
       <metric type="uint64" context="host">
         <name>TotalPhyMem</name>
-        <action>xm info | gawk '/^total_memory/ {print $3}'</action>
+        <action>
+          echo $((`virsh nodeinfo | awk '/^Memory/ {print $3}'` / 1024))
+        </action>
       </metric>
       <metric type="uint64" context="host">
         <name>UsedMem</name>
-        <action>echo "$((`xentop -b -i 1 | gawk '/Domain-0/ {print $5}'` / 1024))"</action>
+        <action>
+          [ -f /proc/xen/privcmd ] &amp;&amp; echo "$((`xentop -b -i 1 | awk '/Domain-0/ {print $5}'` / 1024))" || \
+          free | egrep -i '^[[:space:]]*(.*buffers/cache:)' | awk '{ printf "%d\n", $3/1024; }'
+      </action>
       </metric>
       <metric type="uint64" context="host">
         <name>FreeMem</name>
-        <action>xm info | gawk '/^max_free_memory/ {print $3}'</action>
+        <action>
+          [ -f /proc/xen/privcmd ] &amp;&amp; xl info | awk '/^free_memory/ {print $3}' || \
+          free | egrep -i '^[[:space:]]*(.*buffers/cache:)' | awk '{ printf "%d\n", $4/1024; }'
+        </action>
       </metric>
       <metric type="uint64" context="host">
         <name>PagedInMemory</name>
-        <action>echo "$((`vmstat -s | gawk '/pages paged in/ {print $1}'` / 1024))"</action>
+        <action>
+          vmstat -s | awk '/pages paged in/ {printf "%d\n", $1 / 1024 * $(getconf PAGESIZE) / 1024;}'
+        </action>
       </metric>
       <metric type="uint64" context="host">
         <name>PagedOutMemory</name>
-        <action>echo "$((`vmstat -s | gawk '/pages paged out/ {print $1}'` / 1024))"</action>
+        <action>
+          vmstat -s | awk '/pages paged out/ {printf "%d\n", $1 / 1024 * $(getconf PAGESIZE) / 1024;}'
+        </action>
       </metric>
       <metric type="group" context="host">
         <name>PageRates</name>
@@ -83,13 +112,45 @@ within the vm element.
       </metric>
       <metric type="real64" context="host">
         <name>TotalCPUTime</name>
-        <action>virsh CONNECT dominfo 0 | sed 's/: */:/' | \
-                gawk -F: '/CPU time/ {print $2;}'</action>
+        <action>
+          [ -f /proc/xen/privcmd ] &amp;&amp; xl list | awk '/^Domain-0/ {print $6}' || \
+          awk '
+          function user_hz(   hz)
+          {
+            cmd = "getconf CLK_TCK";
+            cmd | getline;
+            hz  = $1;
+            close(cmd);
+
+            return hz;
+          }
+
+          BEGIN {
+            USER_HZ      = user_hz();
+            TotalCPUTime = 0;
+
+            while ( 0 &lt; ( getline &lt; "/proc/stat" ) )
+            {
+              if ( "cpu" == $1 )
+              {
+                TotalCPUTime = $2 + $3 + $4;
+
+                break;
+              }
+            }
+            close("/proc/stat");
+
+            TotalCPUTime /= USER_HZ;
+            printf "%f\n", TotalCPUTime;
+          }'
+        </action>
       </metric>
       <metric type="real64" context="vm">
         <name>TotalCPUTime</name>
-        <action>virsh CONNECT dominfo NAME | sed 's/: */:/' | \
-                gawk -F: '/CPU time/ {print $2;}'</action>
+        <action>
+          virsh CONNECT dominfo NAME | sed 's/: */:/' | \
+          awk -F: '/CPU time/ {print $2;}' | sed 's/s//'
+        </action>
       </metric>
     </metrics>
   </vhostmd>
