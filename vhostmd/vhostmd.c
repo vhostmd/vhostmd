@@ -117,6 +117,7 @@ static void sig_handler(int sig, siginfo_t *siginfo ATTRIBUTE_UNUSED,
       case SIGQUIT:
          down = 1;
          break;
+      case SIGPIPE:
       default:
          break;
    }
@@ -1054,6 +1055,7 @@ int main(int argc, char *argv[])
    sigaction(SIGINT, &sig_action, NULL);
    sigaction(SIGQUIT, &sig_action, NULL);
    sigaction(SIGTERM, &sig_action, NULL);
+   sigaction(SIGPIPE, &sig_action, NULL);
 
    xmlInitParser();
 

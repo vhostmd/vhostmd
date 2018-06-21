@@ -26,21 +26,48 @@
 
 #include "util.h"
 
+enum {
+    CLOSED = 0,
+    ESTABLISHED
+} connection = CLOSED;
+
 static virConnectPtr conn = NULL;
 
 const char *libvirt_uri = NULL;
 
-static int
-do_connect (void)
+void
+conn_close_cb(virConnectPtr c,
+              int reason ATTRIBUTE_UNUSED,
+              void *p ATTRIBUTE_UNUSED)
 {
+    if (c == conn)
+        connection = CLOSED;
+}
+
+static int
+do_connect(void)
+{
+    if (connection == ESTABLISHED)
+        return 0;
+
+    if (conn != NULL)
+        virConnectClose(conn);
+
+    conn = virConnectOpenReadOnly(libvirt_uri);
     if (conn == NULL) {
-	conn = virConnectOpenReadOnly (libvirt_uri);
-	if (conn == NULL) {
-	    vu_log (VHOSTMD_ERR, "Unable to open libvirt connection to %s",
-		    libvirt_uri ? libvirt_uri : "default hypervisor");
-	    return -1;
-	}
+        vu_log(VHOSTMD_ERR, "Unable to open libvirt connection to %s",
+               libvirt_uri ? libvirt_uri : "default hypervisor");
+        return -1;
     }
+
+    if (virConnectRegisterCloseCallback(conn, conn_close_cb, NULL, NULL)) {
+        vu_log(VHOSTMD_ERR, "Unable to register callback 'virConnectCloseFunc'");
+        virConnectClose(conn);
+        conn = NULL;
+        return -1;
+    }
+
+    connection = ESTABLISHED;
     return 0;
 }
 
@@ -107,8 +134,10 @@ void vu_vm_free(vu_vm *vm)
 void vu_vm_connect_close()
 {
    if (conn) {
+      virConnectUnregisterCloseCallback(conn, conn_close_cb);
       virConnectClose(conn);
       conn = NULL;
    }
+   connection = CLOSED;
 }
 
