@@ -118,15 +118,17 @@ vu_vm *vu_get_vm(int id)
 
  error:
    virDomainFree(dom);
-   free(vm);
+   vu_vm_free(vm);
    return NULL;
 }
 
 void vu_vm_free(vu_vm *vm)
 {
    if (vm) {
-      free(vm->name);
-      free(vm->uuid);
+      if (vm->name)
+         free(vm->name);
+      if (vm->uuid)
+         free(vm->uuid);
       free(vm);
    }
 }
