@@ -28,17 +28,13 @@
 
 static void usage(const char *argv0)
 {
-#ifdef WITH_XENSTORE
    char *options_str = "Options:\n"
          "\t-v | --verbose         Verbose messages.\n"
          "\t-d | --dest            Metrics destination file .\n"
-         "\t-b | --vbd             Get metrics from vbd.\n"
-         "\t-x | --xenstore        Get metrics from xenstore.\n";
-#else
-   char *options_str = "Options:\n"
-         "\t-v | --verbose         Verbose messages.\n"
-         "\t-d | --dest            Metrics destination file .\n";
+#ifdef WITH_XENSTORE
+         "\t-x | --xenstore        Get metrics from xenstore.\n"
 #endif
+         "\t-b | --vbd             Get metrics from vbd.\n";
 
    fprintf (stderr, "\nUsage: %s [options]\n\n%s\n", argv0, options_str);
 }
@@ -46,16 +42,16 @@ static void usage(const char *argv0)
 int main(int argc, char *argv[])
 {
    int verbose = 0;
-#ifdef WITH_XENSTORE
    int vbd = 0;
+#ifdef WITH_XENSTORE
    int xenstore = 0;
 #endif
    const char *dfile = NULL;
 
    struct option opts[] = {
       { "verbose", no_argument, &verbose, 1},
-#ifdef WITH_XENSTORE
       { "vbd", no_argument, &vbd, 1},
+#ifdef WITH_XENSTORE
       { "xenstore", no_argument, &xenstore, 1},
 #endif
       { "help", no_argument, NULL, '?' },
@@ -70,7 +66,7 @@ int main(int argc, char *argv[])
 #ifdef WITH_XENSTORE
       c = getopt_long(argc, argv, "d:vbx", opts, &optidx);
 #else
-      c = getopt_long(argc, argv, "d:v", opts, &optidx);
+      c = getopt_long(argc, argv, "d:vb", opts, &optidx);
 #endif
 
       if (c == -1)
@@ -83,10 +79,10 @@ int main(int argc, char *argv[])
          case 'v':
             verbose = 1;
             break;
-#ifdef WITH_XENSTORE
          case 'b':
             vbd = 1;
             break;
+#ifdef WITH_XENSTORE
          case 'x':
             xenstore = 1;
             break;
@@ -106,22 +102,26 @@ int main(int argc, char *argv[])
 #ifdef WITH_XENSTORE
    if (xenstore) {
        if (dump_xenstore_metrics(dfile) == -1)
-	   exit (1);
+           exit(1);
+       exit(0);
    }
-   if (vbd) {
-       if (dump_metrics(dfile) == -1)
-	   exit (1);
-   }
-   /* Try disk first and if not found try xenstore */
-   if (vbd == 0 && xenstore == 0) {
-       if (dump_metrics(dfile) == -1)
-           if (dump_xenstore_metrics(dfile) == -1)
-	       exit (1);
-   }
-#else
-   if (dump_metrics(dfile) == -1)
-       exit (1);
 #endif
 
-   exit (0);
+   if (vbd) {
+       if (dump_metrics(dfile) == -1)
+           exit(1);
+       exit(0);
+   }
+
+   /* If no metrics source is specfied, try disk first and then xenstore */
+   if (dump_metrics(dfile) == -1) {
+#ifdef WITH_XENSTORE
+       if (dump_xenstore_metrics(dfile) == -1)
+	       exit(1);
+#else
+       exit(1);
+#endif
+   }
+
+   exit(0);
 }
