@@ -29,24 +29,18 @@
 static void usage(const char *argv0)
 {
 #ifdef WITH_XENSTORE
-   char *options_str = "Options:\n\
-         -v | --verbose         Verbose messages.\n\
-         -d | --dest            Metrics destination file .\n\
-         -b | --vbd             Get metrics from vbd.\n\
-         -x | --xenstore        Get metrics from xenstore.\n";
+   char *options_str = "Options:\n"
+         "\t-v | --verbose         Verbose messages.\n"
+         "\t-d | --dest            Metrics destination file .\n"
+         "\t-b | --vbd             Get metrics from vbd.\n"
+         "\t-x | --xenstore        Get metrics from xenstore.\n";
 #else
-   char *options_str = "Options:\n\
-         -v | --verbose         Verbose messages.\n\
-         -d | --dest            Metrics destination file .\n";
+   char *options_str = "Options:\n"
+         "\t-v | --verbose         Verbose messages.\n"
+         "\t-d | --dest            Metrics destination file .\n";
 #endif
 
-   fprintf (stderr,
-         "\n\
-         Usage:\n\
-         %s [options]\n\
-         \n\
-         %s\n",
-         argv0, options_str);
+   fprintf (stderr, "\nUsage: %s [options]\n\n%s\n", argv0, options_str);
 }
 
 int main(int argc, char *argv[])
