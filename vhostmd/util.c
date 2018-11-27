@@ -53,6 +53,7 @@ static int buffer_grow(vu_buffer *buf, int len)
         return -1;
 
     buf->size = size;
+    memset(&buf->content[buf->use], 0, len);
     return 0;
 }
 
