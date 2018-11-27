@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
@@ -918,6 +919,9 @@ static int vhostmd_run(int diskfd)
    }
    
    while (!down) {
+      time_t run_time,
+             start_time = time(NULL);
+
       vu_buffer_add(buf, "<metrics>\n", -1);
       if (metrics_host_get(buf))
          vu_log(VHOSTMD_ERR, "Failed to collect host metrics "
@@ -936,7 +940,11 @@ static int vhostmd_run(int diskfd)
 #endif
       if (ids)
           free(ids);
-      sleep(update_period);
+
+      run_time = time(NULL) - start_time;
+      if ((run_time > 0) && (run_time < update_period))
+         sleep((unsigned int) (update_period - run_time));
+
       vu_buffer_erase(buf);
    }
    vu_buffer_delete(buf);
