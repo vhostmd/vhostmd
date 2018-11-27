@@ -233,6 +233,7 @@ void vu_buffer_erase(vu_buffer *buf)
    if (buf) {
       memset(buf->content, '\0', buf->size);
       buf->use = 0;
+      buf->pos = 0;
    }
 }
 

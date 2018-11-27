@@ -42,6 +42,7 @@ typedef enum {
 typedef struct _vu_buffer {
     unsigned int size;
     unsigned int use;
+    unsigned int pos;
     char *content;
 }vu_buffer;
 
