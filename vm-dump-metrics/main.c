@@ -34,6 +34,7 @@ static void usage(const char *argv0)
 #ifdef WITH_XENSTORE
          "\t-x | --xenstore        Get metrics from xenstore.\n"
 #endif
+         "\t-i | --virtio          Get metrics from virtio channel.\n"
          "\t-b | --vbd             Get metrics from vbd.\n";
 
    fprintf (stderr, "\nUsage: %s [options]\n\n%s\n", argv0, options_str);
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
 #ifdef WITH_XENSTORE
    int xenstore = 0;
 #endif
+   int virtio = 0;
    const char *dfile = NULL;
 
    struct option opts[] = {
@@ -54,6 +56,7 @@ int main(int argc, char *argv[])
 #ifdef WITH_XENSTORE
       { "xenstore", no_argument, &xenstore, 1},
 #endif
+      { "virtio", no_argument, &virtio, 1},
       { "help", no_argument, NULL, '?' },
       { "dest", optional_argument, NULL, 'd'},
       {0, 0, 0, 0}
@@ -64,9 +67,9 @@ int main(int argc, char *argv[])
       int c;
 
 #ifdef WITH_XENSTORE
-      c = getopt_long(argc, argv, "d:vbx", opts, &optidx);
+      c = getopt_long(argc, argv, "d:vbix", opts, &optidx);
 #else
-      c = getopt_long(argc, argv, "d:vb", opts, &optidx);
+      c = getopt_long(argc, argv, "d:vbi", opts, &optidx);
 #endif
 
       if (c == -1)
@@ -81,6 +84,9 @@ int main(int argc, char *argv[])
             break;
          case 'b':
             vbd = 1;
+            break;
+         case 'i':
+            virtio = 1;
             break;
 #ifdef WITH_XENSTORE
          case 'x':
@@ -107,20 +113,31 @@ int main(int argc, char *argv[])
    }
 #endif
 
+   if (virtio) {
+       if (dump_virtio_metrics(dfile) == -1)
+           exit(1);
+       exit(0);
+   }
+
    if (vbd) {
        if (dump_metrics(dfile) == -1)
            exit(1);
        exit(0);
    }
 
-   /* If no metrics source is specfied, try disk first and then xenstore */
+   /*
+    * If no metrics source is specfied, try default order
+    * disk, virtio, xenstore
+    */
    if (dump_metrics(dfile) == -1) {
+       if (dump_virtio_metrics(dfile) == -1) {
 #ifdef WITH_XENSTORE
-       if (dump_xenstore_metrics(dfile) == -1)
-	       exit(1);
+           if (dump_xenstore_metrics(dfile) == -1)
+               exit(1);
 #else
-       exit(1);
+           exit(1);
 #endif
+       }
    }
 
    exit(0);
