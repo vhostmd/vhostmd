@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul 25 10:00:20 CEST 2018 - michael.trapp@sap.com
+
+- add virtio as transport mechanism
+
+-------------------------------------------------------------------
 Mon Jun 29 16:42:39 MDT 2009 - jfehlig@novell.com
 
 - Validate XML returned by 'action' for metric type 'xml'

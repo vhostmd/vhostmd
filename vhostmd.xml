@@ -33,9 +33,14 @@ the logical && operator must be replaced with "&amp;&amp;".
         <path>/dev/shm/vhostmd0</path>
         <size unit="k">256</size>
       </disk>
+      <virtio>
+        <max_channels>1024</max_channels>
+        <expiration_time>15</expiration_time>
+      </virtio>
       <update_period>5</update_period>
       <path>/usr/sbin:/sbin:/usr/bin:/bin:/usr/share/vhostmd/scripts</path>
       <transport>vbd</transport>
+      <transport>virtio</transport>
       <!-- <transport>xenstore</transport> -->
     </globals>
     <metrics>

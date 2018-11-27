@@ -42,10 +42,11 @@
 #include <time.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#include <pthread.h>
 
 #include "util.h"
 #include "metric.h"
-
+#include "virtio.h"
 
 /*
  * vhostmd will periodically write metrics to a disk.  The metrics
@@ -85,6 +86,7 @@ typedef struct _mdisk_header
  */
 #define VBD      (1 << 0)
 #define XENSTORE (1 << 1)
+#define VIRTIO   (1 << 2)
 
 /* Global variables */
 static int down = 0;
@@ -103,6 +105,8 @@ static mdisk_header md_header =
          };
 static char *search_path = NULL;
 static int transports = 0;
+static int virtio_max_channels = 1024;
+static int virtio_expiration_time = 15;
 
 
 /**********************************************************************
@@ -470,6 +474,8 @@ static int parse_transports(xmlDocPtr xml,
 	     return -1;
 #endif
 	 }
+         if (strncasecmp((char *)str, "virtio", strlen("virtio")) == 0)
+             transports |= VIRTIO;
          free(str);
       }
    }
@@ -605,6 +611,14 @@ static int parse_config_file(const char *filename)
       goto out;
    }
     
+   if (transports & VIRTIO) {
+      if (vu_xpath_long("string(./globals/virtio/max_channels[1])", ctxt, &l) == 0)
+         virtio_max_channels = (int)l;
+
+      if (vu_xpath_long("string(./globals/virtio/expiration_time[1])", ctxt, &l) == 0)
+         virtio_expiration_time = (int)l;
+   }
+
    /* Parse requested metrics definitions */
    if (parse_metrics(xml, ctxt)) {
       vu_log(VHOSTMD_ERR, "Unable to parse metrics definition "
@@ -838,7 +852,8 @@ static int metrics_disk_create(void)
 static int metrics_host_get(vu_buffer *buf)
 {
    metric *m = metrics;
-   
+   unsigned start = buf->use;
+
    while (m) {
       if (m->ctx != METRIC_CONTEXT_HOST) {
          m = m->next;
@@ -850,12 +865,18 @@ static int metrics_host_get(vu_buffer *buf)
          
       m = m->next;
    }
+
+   if (transports & VIRTIO)
+      virtio_metrics_update(&buf->content[start], (int) (buf->use - start),
+                            0, "Dom0");
+
    return 0;
 }
 
 static int metrics_vm_get(vu_vm *vm, vu_buffer *buf)
 {
    metric *m = metrics;
+   unsigned    start = buf->use;
 
    while (m) {
       if (m->ctx != METRIC_CONTEXT_VM) {
@@ -868,6 +889,11 @@ static int metrics_vm_get(vu_vm *vm, vu_buffer *buf)
          
       m = m->next;
    }
+
+   if (transports & VIRTIO)
+      virtio_metrics_update(&buf->content[start], (int) (buf->use - start),
+                            vm->id, vm->name);
+
    return 0;
 }
 
@@ -912,10 +938,29 @@ static int vhostmd_run(int diskfd)
    int *ids = NULL;
    int num_vms = 0;
    vu_buffer *buf = NULL;
+   pthread_t virtio_tid;
    
    if (vu_buffer_create(&buf, MDISK_SIZE_MIN - MDISK_HEADER_SIZE)) {
       vu_log(VHOSTMD_ERR, "Unable to allocate memory");
       return -1;
+   }
+
+   if (transports & VIRTIO) {
+      int rc;
+
+      if (virtio_expiration_time < (update_period * 3))
+         virtio_expiration_time = update_period * 3;
+
+      if (virtio_init(virtio_max_channels, virtio_expiration_time))
+         return -1;
+
+      rc = pthread_create(&virtio_tid, NULL, virtio_run, NULL);
+
+      if (rc != 0) {
+         vu_log(VHOSTMD_ERR, "Failed to start virtio thread '%s'\n",
+                strerror(rc));
+         return -1;
+      }
    }
    
    while (!down) {
@@ -948,6 +993,12 @@ static int vhostmd_run(int diskfd)
       vu_buffer_erase(buf);
    }
    vu_buffer_delete(buf);
+
+   if (transports & VIRTIO) {
+      virtio_stop();
+      pthread_join(virtio_tid, NULL);
+   }
+
    return 0;
 }
 

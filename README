@@ -50,8 +50,14 @@ includes a few examples of user-defined metrics, which provide a
         <path>/dev/shm/vhostmd0</path>
         <size unit="k">256</size>
       </disk>
+      <virtio>
+        <max_channels>1024</max_channels>
+        <expiration_time>15</expiration_time>
+      </virtio>
       <update_period>5</update_period>
       <path>/usr/bin:/usr/sbin:/usr/share/vhostmd/scripts</path>
+      <transport>vbd</transport>
+      <transport>virtio</transport>
     </globals>
     <metrics>
       <metric type="string" context="host">
@@ -115,11 +121,17 @@ includes a few examples of user-defined metrics, which provide a
   </vhostmd>
 
 A valid configuration file must contain the root element <vhostmd>.
-The <globals> element contains configuration global to vhostmd, such as
-the metrics disk path and the metrics refresh interval.  The <metrics>
-element is a container for all of the <metric> elements.  A metric element
-is used to define a metric, giving it a name and an action that produces
-the metric value.
+
+The <globals> element contains configuration global to vhostmd, such as the
+metrics refresh interval and the metrics transport mechanism. The <transport>
+element defines how the metrics are transported between the host and VMs. The
+vbd transport uses a virtual disk, described in the <disk> element, to share
+metrics data between host and VM. The virtio transport, described by the
+<virtio> element, uses a virtio-serial connection to share the metrics data.
+
+The <metrics> element is a container for all of the <metric> elements.
+A metric element is used to define a metric, giving it a name and an action
+that produces the metric value.
 
 The supplied vhostmd configuration file provides a useful set of default
 metrics to be collected.  This can be extended or modified by editing
@@ -277,14 +289,66 @@ section:
 (Note: Change target dev and bus as appropriate for the domain)
 
 
+
+Notes on Virtio Transport
+-------------------------
+
+The virtio transport uses a virtio serial device to transport metrics data
+between the host and VMs. Basically for a virtio serial device, QEMU creates
+- a unix domain socket on the Host
+- a serial port on the VM
+- 'connects' both to a 'communication channel'
+
+It can be configured in the virtio section of the vhostmd configuration file.
+<max_channels> defines the maximum number of virtio channels/VMs supported
+by the vhostmd instance with a default value of 1024.
+<expiration_time> is the time after which the virtio serial channel of a VM
+is detached when vhostmd did not receive updates. It's default value is
+'3 * update_period' of the <globals> section and the configured value is
+checked to be at least '3 * update_period'.
+
+  <vhostmd>
+    <globals>
+      <virtio>
+        <max_channels>1024</max_channels>
+        <expiration_time>15</expiration_time>
+      </virtio>
+
+Sample VM config with virtio serial:
+
+  <channel type='unix'>
+    <source mode='bind'/>
+    <target type='virtio' name='org.github.vhostmd.1'/>
+    <address type='virtio-serial' controller='0' bus='0' port='1'/>
+  </channel>
+
+The target name of a channel in a QEMU VM configuration must be
+  'org.github.vhostmd.1'
+
+
+Vhostmd accepts metric requests 'GET /metrics/XML\n\n' and responds with
+
+  <metrics>
+    <metric type='real64' context='host'>
+      <name>TotalCPUTime</name>
+      <value>179645.910000</value>
+    </metric>
+  ...
+    <metric type='uint64' context='vm' id='9' uuid='a70605c8-7d69-8c44-7e1a-5ecd092cb1e1'>
+      <name>UsedMemory</name>
+      <value>524288</value>
+    </metric>
+  </metrics>
+
+
 Guest Tool/Library for Accessing Metrics Data
 ---------------------------------------------
 
 Tool: vm_dump_metrics
  Stand alone static utility will read all the metrics and write them
  to stdout or optionally an argumented file.
- Usaga:
-   vhostmd [-f dest_file]
+ Usage:
+   vm_dump_metrics -b|-i|-x [-d dest_file]
 
 Library: libmetrics.so.0
  Dynamic library that supports individual metrics gathering

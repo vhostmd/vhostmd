@@ -9,7 +9,7 @@ Virtual Host Metrics Daemon (vhostmd). Configuration file DTD
 -->
 
 <!ELEMENT vhostmd (globals,metrics)>
-<!ELEMENT globals (disk,update_period,path,transport+)>
+<!ELEMENT globals (disk,virtio,update_period,path,transport+)>
 
 <!ELEMENT disk (name,path,size)>
 <!ELEMENT name (#PCDATA)>
@@ -19,6 +19,10 @@ Virtual Host Metrics Daemon (vhostmd). Configuration file DTD
           unit CDATA #REQUIRED>
 <!ELEMENT update_period (#PCDATA)>
 <!ELEMENT transport (#PCDATA)>
+
+<!ELEMENT virtio (max_channels,expiration_time)>
+<!ELEMENT max_channels (#PCDATA)>
+<!ELEMENT expiration_time (#PCDATA)>
 
 <!ELEMENT metrics (metric*)>
 <!ELEMENT metric (name,action,variable*)>
