@@ -525,8 +525,6 @@ static int validate_config_file(const char *filename)
     ret = 0;
 
 error:
-    //if (root_element)
-       //xmlFreeNode(root_element);
     if (doc)
        xmlFreeDoc(doc);
     if (pctxt)
@@ -542,7 +540,6 @@ static int parse_config_file(const char *filename)
    xmlDocPtr xml = NULL;
    xmlXPathContextPtr ctxt = NULL;
    xmlNodePtr root;
-   //config_file_element *element = NULL;
    char *unit = NULL;
    long l;
    int ret = -1;
