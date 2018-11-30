@@ -255,7 +255,7 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
 
    /* Get the matching metric node value */
    asprintf(&xpath, "//metrics/metric[name='%s'][@context='%s']/value/text()", pmdef->name, pmdef->context);
-   obj = xmlXPathEval( BAD_CAST xpath, ctxt);  // worked but no nodes 
+   obj = xmlXPathEval( BAD_CAST xpath, ctxt);  /* worked but no nodes */
    free(xpath);
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
       libmsg("%s(): No metrics value found!\n", __func__);

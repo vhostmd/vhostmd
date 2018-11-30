@@ -145,7 +145,7 @@ static int get_assoicated_metrics(char *buffer, vu_buffer *mbuf, char *uuid)
 
    /* Get the associated vm metrics set */
    asprintf(&xpath, "//metrics/metric[@context='%s'][@uuid='%s']", "vm", uuid);
-   obj = xmlXPathEval( BAD_CAST xpath, ctxt);  // worked but no nodes 
+   obj = xmlXPathEval( BAD_CAST xpath, ctxt);  /* worked but no nodes */
    free(xpath);
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
       vu_log(VHOSTMD_ERR, "%s(): No VM metrics found!\n", __func__);
