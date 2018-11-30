@@ -1,4 +1,4 @@
-AC_INIT(Virtual Host Metrics Daemon, 0.5, virt-tools-list@redhat.com, vhostmd)
+AC_INIT(Virtual Host Metrics Daemon, 1.0, virt-tools-list@redhat.com, vhostmd)
 
 AC_CONFIG_SRCDIR(vhostmd/vhostmd.c)
 AC_CONFIG_HEADERS([config.h])

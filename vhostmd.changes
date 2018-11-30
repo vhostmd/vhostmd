@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Nov 30 20:35:18 UTC 2018 - jfehlig@suse.com
+
+- Version 1.0
+  - Add virtio as transport mechanism
+  - Update to work with modern Xen
+  - Add SIGPIPE handler and reconnect
+  - Add systemd service file
+  - Modernize build files
+  - Misc bug fixes and improvements
+
+-------------------------------------------------------------------
 Wed Jul 25 10:00:20 CEST 2018 - michael.trapp@sap.com
 
 - add virtio as transport mechanism
