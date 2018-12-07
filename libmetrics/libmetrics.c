@@ -681,8 +681,8 @@ int dump_metrics(const char *dest_file)
     }
 
     if (fwrite(mdisk->buffer, 1, mdisk->length, fp) != mdisk->length) {
-        libmsg("Error, unable to export metrics to file:%s - error:%s\n", 
-                dest_file, strerror(errno));
+        libmsg("Error, unable to export metrics to file:%s - error:%s\n",
+                dest_file ? dest_file : "stdout", strerror(errno));
     }
     if (dest_file)
         fclose(fp);
