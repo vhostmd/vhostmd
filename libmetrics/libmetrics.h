@@ -102,8 +102,4 @@ int dump_xenstore_metrics(const char *dest_file);
 
 /* dump metrics from virtio serial port to xml formatted file */
 int dump_virtio_metrics(const char *dest_file);
-
-/* dump metrics from virtio serial port to buffer */
-const char *get_virtio_metrics(const char *dev_name);
-
 #endif

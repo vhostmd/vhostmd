@@ -775,3 +775,134 @@ out:
 }
 #endif
 
+/*
+ * dump metrics from virtio serial port to buffer
+ */
+static char *get_virtio_metrics(void)
+{
+    const char request[] = "GET /metrics/XML\n\n", end_token[] = "\n\n";
+    const char dev[] = "/dev/virtio-ports/org.github.vhostmd.1";
+
+    char *response = NULL;
+    int fd = -1;
+    size_t pos;
+    size_t buf_size = (1 << 16);
+    const size_t req_len = (size_t) strlen(request);
+    const time_t start_time = time(NULL);
+
+    response = calloc(1UL, buf_size);
+    if (response == NULL)
+        goto error;
+
+    fd = open(dev, O_RDWR | O_NONBLOCK);
+
+    if (fd < 0) {
+        libmsg("Error, unable to export metrics: open(%s) %s\n",
+                dev, strerror(errno));
+        goto error;
+    }
+
+    pos = 0;
+    while (pos < req_len) {
+        ssize_t len = write(fd, &request[pos], req_len - pos);
+        if (len > 0)
+            pos += (size_t) len;
+        else {
+            if (errno == EAGAIN)
+                usleep(10000);
+            else
+                goto error;
+        }
+    }
+
+    pos = 0;
+    do {
+        ssize_t len = read(fd, &response[pos], buf_size - pos - 1);
+        if (len > 0) {
+            pos += (size_t) len;
+            response[pos] = 0;
+
+            if ((pos + 1) >= buf_size) {
+                buf_size = buf_size << 1;  /* increase response buffer */
+                if (buf_size > (1 << 24))  /* max 16MB */
+                    goto error;
+
+                response = realloc(response, buf_size);
+                if (response == NULL)
+                    goto error;
+
+                memset(&response[pos], 0, buf_size - pos);
+            }
+        } else {
+            if (errno == EAGAIN) {
+                usleep(10000);
+                if (time(NULL) > (start_time + 30)) {
+                    libmsg("Error, unable to read metrics"
+                            " - timeout after 30s\n");
+                    goto error;
+                }
+            } else
+                goto error;
+        }
+    } while ((pos < (size_t) strlen(end_token) ||
+             strcmp(end_token, &response[pos - (size_t) strlen(end_token)]) != 0) &&
+             pos < buf_size);
+
+    if (fd >= 0)
+        close(fd);
+
+    return response;
+
+  error:
+    if (fd >= 0)
+        close(fd);
+    if (response)
+        free(response);
+
+    return NULL;
+}
+
+/*
+ * dump metrics from virtio serial port to xml formatted file
+ */
+int dump_virtio_metrics(const char *dest_file)
+{
+    FILE *fp = stdout;
+    char *response = NULL;
+    size_t len;
+
+    response = get_virtio_metrics();
+    if (response == NULL)
+        goto error;
+
+    len = strlen(response);
+
+    if (dest_file) {
+        fp = fopen(dest_file, "w");
+        if (fp == NULL) {
+            libmsg("Error, unable to dump metrics: fopen(%s) %s\n",
+                   dest_file, strerror(errno));
+            goto error;
+        }
+    }
+
+    if (fwrite(response, 1UL, len, fp) != len) {
+        libmsg("Error, unable to export metrics to file:%s %s\n",
+                dest_file ? dest_file : "stdout", strerror(errno));
+        goto error;
+    }
+
+    if (response)
+        free(response);
+
+    return 0;
+
+  error:
+    if (dest_file && fp)
+        fclose(fp);
+
+    if (response)
+        free(response);
+
+    return -1;
+}
