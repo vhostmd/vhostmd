@@ -278,8 +278,7 @@ static int vio_readdir(const char * path)
     while ((ent = readdir(dir)) != NULL) {
         int rc, id;
 
-        if (ent->d_type == DT_DIR &&
-            sscanf(ent->d_name, "domain-%d-", &id) == 1) {
+        if (sscanf(ent->d_name, "domain-%d-", &id) == 1) {
 
             char tmp[SUN_PATH_LEN + 8];
             struct stat st;
