@@ -422,6 +422,9 @@ retry:
 error:
    if (dir)
        closedir(dir);
+
+   libmsg("%s(): Unable to read metrics disk\n", __func__);
+
    return -1;
 }
 
@@ -641,10 +644,7 @@ void __attribute__ ((constructor)) libmetrics_init(void)
    if (mdisk_alloc() == NULL) 
       goto error;
 
-   if (read_mdisk(mdisk) != 0) {
-      libmsg("%s(): Unable to read metrics disk\n", __func__);
-      goto error;
-   }
+   mdisk->sum = 0;
    return;
 
 error:
@@ -664,7 +664,7 @@ int dump_metrics(const char *dest_file)
 {
     FILE *fp;
 
-    if (mdisk == NULL) {
+    if (mdisk == NULL || read_mdisk(mdisk) < 0) {
         errno = ENOMEDIUM;
         return -1;
     }
