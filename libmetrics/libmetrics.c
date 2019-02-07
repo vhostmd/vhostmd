@@ -797,8 +797,8 @@ static char *get_virtio_metrics(void)
     fd = open(dev, O_RDWR | O_NONBLOCK);
 
     if (fd < 0) {
-        libmsg("Error, unable to export metrics: open(%s) %s\n",
-                dev, strerror(errno));
+        libmsg("%s(): Unable to export metrics: open(%s) %s\n",
+                __func__, dev, strerror(errno));
         goto error;
     }
 
@@ -859,6 +859,8 @@ static char *get_virtio_metrics(void)
     if (response)
         free(response);
 
+    libmsg("%s(): Unable to read metrics\n", __func__);
+
     return NULL;
 }
 
@@ -880,15 +882,15 @@ int dump_virtio_metrics(const char *dest_file)
     if (dest_file) {
         fp = fopen(dest_file, "w");
         if (fp == NULL) {
-            libmsg("Error, unable to dump metrics: fopen(%s) %s\n",
-                   dest_file, strerror(errno));
+            libmsg("%s(), unable to dump metrics: fopen(%s) %s\n",
+                   __func__, dest_file, strerror(errno));
             goto error;
         }
     }
 
     if (fwrite(response, 1UL, len, fp) != len) {
-        libmsg("Error, unable to export metrics to file:%s %s\n",
-                dest_file ? dest_file : "stdout", strerror(errno));
+        libmsg("%s(), unable to export metrics to file:%s %s\n",
+                __func__, dest_file ? dest_file : "stdout", strerror(errno));
         goto error;
     }
 
