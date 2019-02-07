@@ -788,7 +788,8 @@ static char *get_virtio_metrics(void)
     size_t pos;
     size_t buf_size = (1 << 16);
     const size_t req_len = (size_t) strlen(request);
-    const time_t start_time = time(NULL);
+    const time_t timeout = 5;
+    time_t end_time;
 
     response = calloc(1UL, buf_size);
     if (response == NULL)
@@ -803,19 +804,27 @@ static char *get_virtio_metrics(void)
     }
 
     pos = 0;
+    end_time = time(NULL) + timeout;
     while (pos < req_len) {
         ssize_t len = write(fd, &request[pos], req_len - pos);
         if (len > 0)
             pos += (size_t) len;
         else {
-            if (errno == EAGAIN)
+            if (errno == EAGAIN) {
                 usleep(10000);
+                if (time(NULL) > end_time) {
+                    libmsg("%s(): Unable to send metrics request"
+                            " - timeout after %us\n", __func__, timeout);
+                    goto error;
+                }
+            }
             else
                 goto error;
         }
     }
 
     pos = 0;
+    end_time = time(NULL) + timeout;
     do {
         ssize_t len = read(fd, &response[pos], buf_size - pos - 1);
         if (len > 0) {
@@ -836,9 +845,9 @@ static char *get_virtio_metrics(void)
         } else {
             if (errno == EAGAIN) {
                 usleep(10000);
-                if (time(NULL) > (start_time + 30)) {
-                    libmsg("Error, unable to read metrics"
-                            " - timeout after 30s\n");
+                if (time(NULL) > end_time) {
+                    libmsg("%s(): Unable to read metrics"
+                            " - timeout after %us\n", __func__, timeout);
                     goto error;
                 }
             } else
