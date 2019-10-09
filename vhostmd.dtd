@@ -9,7 +9,7 @@ Virtual Host Metrics Daemon (vhostmd). Configuration file DTD
 -->
 
 <!ELEMENT vhostmd (globals,metrics)>
-<!ELEMENT globals (disk,virtio,update_period,path,transport+)>
+<!ELEMENT globals (disk,virtio*,update_period,path,transport+)>
 
 <!ELEMENT disk (name,path,size)>
 <!ELEMENT name (#PCDATA)>
