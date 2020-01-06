@@ -228,7 +228,7 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
    xmlNodePtr node;
    char *str;
    char *xpath;
-   int ret = 0;
+   int ret = -1;
 
    ctxt = xmlXPathNewContext(mdisk->doc);
    if (!ctxt) {
@@ -242,19 +242,16 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
       libmsg("%s(): No metrics found that matches %s in context:%s or malformed definition\n",
               __func__, pmdef->name, pmdef->context);
-      ret = -1;
       goto out;
    }
    if (xmlXPathNodeSetGetLength(obj->nodesetval) != 1) {
       libmsg("%s(): No metrics found that matches %s in context:%s or malformed definition\n",
               __func__, pmdef->name, pmdef->context);
-      ret = -1;
       goto out;
    }
    node = obj->nodesetval->nodeTab[0];
    if ((str = (char *)xmlGetProp(node, BAD_CAST "type")) == NULL) {
       libmsg("%s(): Metric type not specified\n", __func__);
-      ret = -1;
       goto out;
    }
    metric_type_from_str((char *)str, &(pmdef->type));
@@ -267,7 +264,6 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
    free(xpath);
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
       libmsg("%s(): No metrics value found!\n", __func__);
-      ret = -1;
       goto out;
    }
 
@@ -276,6 +272,7 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
    str = (char *)xmlNodeListGetString(mdisk->doc, node, 1);
    pmdef->value = strdup(str);
    free(str);
+   ret = 0;
 
 out:
    if (obj)
@@ -707,7 +704,7 @@ int dump_xenstore_metrics(const char *dest_file)
     char *buf = NULL, *path = NULL, *metrics = NULL;
     struct xs_handle *xsh = NULL;
     unsigned int len;
-    int ret = 0;
+    int ret = -1;
 	xmlParserCtxtPtr pctxt = NULL;
 	xmlDocPtr doc = NULL;
     int domid;
@@ -726,35 +723,30 @@ int dump_xenstore_metrics(const char *dest_file)
 
     if ((domid = get_dom_id()) == -1) {
         libmsg("Unable to derive domID.\n" );
-        ret = -1;
         goto out;
     }
 
     xsh = xs_domain_open();
     if (xsh == NULL) {
         libmsg("xs_domain_open() error. errno: %d.\n", errno);
-        ret = -1;
         goto out;
     }
 
     path = xs_get_domain_path(xsh, domid);
     if (path == NULL) {
         libmsg("xs_get_domain_path() error. domid %d.\n", 0);
-        ret = -1;
         goto out;
     }
     asprintf(&buf, "%s/metrics", path);
     metrics = xs_read(xsh, XBT_NULL, buf, &len);
     if (metrics == NULL) {
         libmsg("xs_read(): uuid get error. %s.\n", buf);
-        ret = -1;
         goto out;
     }
 
     pctxt = xmlNewParserCtxt();
     if (!pctxt || !pctxt->sax) {
       libmsg("%s(): failed to create parser \n", __func__);
-      ret = -1;
       goto out;
     }
 
@@ -764,10 +756,10 @@ int dump_xenstore_metrics(const char *dest_file)
                             XML_PARSE_NOWARNING);
     if (!doc) {
       libmsg("%s(): libxml failed to xenstore metrics attribute\n", __func__);
-      ret = -1;
       goto out;
     }
     xmlDocFormatDump(fp, doc, 1);
+    ret = 0;
 
 out:
     if (fp && fp != stdout)
