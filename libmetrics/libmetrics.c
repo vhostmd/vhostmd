@@ -177,14 +177,22 @@ static metric_disk * mdisk_alloc()
 static void mdisk_content_free()
 {
    if (mdisk) {
-      if (mdisk->doc)
-          xmlFreeDoc(mdisk->doc);
-      if (mdisk->pctxt)
-         xmlFreeParserCtxt(mdisk->pctxt);
-      if (mdisk->buffer)
-         free(mdisk->buffer);
-      if (mdisk->disk_name)
-         free(mdisk->disk_name);
+       if (mdisk->doc) {
+           xmlFreeDoc(mdisk->doc);
+           mdisk->doc = NULL;
+       }
+       if (mdisk->pctxt) {
+           xmlFreeParserCtxt(mdisk->pctxt);
+           mdisk->pctxt = NULL;
+       }
+       if (mdisk->buffer) {
+           free(mdisk->buffer);
+           mdisk->buffer = NULL;
+       }
+       if (mdisk->disk_name) {
+           free(mdisk->disk_name);
+           mdisk->disk_name = NULL;
+       }
    }
 }
 
