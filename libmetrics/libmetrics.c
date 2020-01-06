@@ -236,7 +236,9 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
    }
 
    /* Get the matching metric node type */
-   asprintf(&xpath, "//metrics/metric[name='%s'][@context='%s']", pmdef->name, pmdef->context);
+   if (asprintf(&xpath, "//metrics/metric[name='%s'][@context='%s']", pmdef->name, pmdef->context) < 0)
+       goto out;
+
    obj = xmlXPathEval(BAD_CAST xpath, ctxt);
    free(xpath);
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
@@ -259,7 +261,9 @@ static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
    xmlXPathFreeObject(obj);
 
    /* Get the matching metric node value */
-   asprintf(&xpath, "//metrics/metric[name='%s'][@context='%s']/value/text()", pmdef->name, pmdef->context);
+   if (asprintf(&xpath, "//metrics/metric[name='%s'][@context='%s']/value/text()", pmdef->name, pmdef->context) < 0)
+       goto out;
+
    obj = xmlXPathEval( BAD_CAST xpath, ctxt);  /* worked but no nodes */
    free(xpath);
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
@@ -349,7 +353,8 @@ retry:
             strcmp(entry->d_name, "..") == 0)
          continue;
 
-      asprintf(&path, "/dev/%s", entry->d_name);
+      if (asprintf(&path, "/dev/%s", entry->d_name) < 0)
+          goto error;
 #else
       path = strdup("/dev/shm/vhostmd0");
 #endif
@@ -737,7 +742,9 @@ int dump_xenstore_metrics(const char *dest_file)
         libmsg("xs_get_domain_path() error. domid %d.\n", 0);
         goto out;
     }
-    asprintf(&buf, "%s/metrics", path);
+    if (asprintf(&buf, "%s/metrics", path) , 0)
+        goto out;    
+
     metrics = xs_read(xsh, XBT_NULL, buf, &len);
     if (metrics == NULL) {
         libmsg("xs_read(): uuid get error. %s.\n", buf);
