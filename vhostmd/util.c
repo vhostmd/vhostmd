@@ -422,10 +422,12 @@ char *vu_str_replace(const char *haystack, const char *origstr, const char *news
    cp = tempstr;
    for (i=0; i <cnt; i++) {
       p = strstr(cp, origstr);
-      *p = '\0';
-      strcat(dest, cp);
-      strcat(dest, newstr);
-      cp = p + origlen;
+      if (p) {
+         *p = '\0';
+         strcat(dest, cp);
+         strcat(dest, newstr);
+         cp = p + origlen;
+      }
    }
    strcat(dest, cp);
 
