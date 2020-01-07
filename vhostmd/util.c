@@ -415,7 +415,7 @@ char *vu_str_replace(const char *haystack, const char *origstr, const char *news
 
    dest = malloc(strlen(haystack) - (origlen * cnt) + (newlen * cnt) + 1);
    if (dest == NULL) {
-      return(NULL);
+      goto out;
    }
    *dest = '\0';
 
@@ -428,6 +428,8 @@ char *vu_str_replace(const char *haystack, const char *origstr, const char *news
       cp = p + origlen;
    }
    strcat(dest, cp);
+
+out:
    free(tempstr);
 
    return dest;
