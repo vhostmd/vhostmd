@@ -601,7 +601,7 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
        mdisk_free();
        if (mdisk_alloc() == NULL) {
            errno = ENOMEM;
-           return -1;
+           goto out;
        }
        read_mdisk(mdisk);
    }
@@ -620,7 +620,7 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
    
       if ((lmdef = metric_alloc_padded(extra_len)) == NULL) {
          errno = ENOMEM;
-         return -1;
+         goto out;
       }
 
       lmdef->type = pmdef.type;
@@ -635,6 +635,7 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
    if (pmdef.context)
       free(pmdef.context);
 
+out:
    /* unlock library data */
    pthread_mutex_unlock(&libmetrics_mutex);
    return ret;
