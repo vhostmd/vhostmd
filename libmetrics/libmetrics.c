@@ -890,10 +890,11 @@ int dump_virtio_metrics(const char *dest_file)
     FILE *fp = stdout;
     char *response = NULL;
     size_t len;
+    int ret = -1;
 
     response = get_virtio_metrics();
     if (response == NULL)
-        goto error;
+        return -1;
 
     len = strlen(response);
 
@@ -902,27 +903,24 @@ int dump_virtio_metrics(const char *dest_file)
         if (fp == NULL) {
             libmsg("%s(), unable to dump metrics: fopen(%s) %s\n",
                    __func__, dest_file, strerror(errno));
-            goto error;
+            goto out;
         }
     }
 
     if (fwrite(response, 1UL, len, fp) != len) {
         libmsg("%s(), unable to export metrics to file:%s %s\n",
                 __func__, dest_file ? dest_file : "stdout", strerror(errno));
-        goto error;
+        goto out;
     }
 
-    if (response)
-        free(response);
+    ret = 0;
 
-    return 0;
-
-  error:
+out:
     if (dest_file && fp)
         fclose(fp);
 
     if (response)
         free(response);
 
-    return -1;
+    return ret;
 }
