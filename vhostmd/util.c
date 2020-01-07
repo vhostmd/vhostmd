@@ -214,13 +214,16 @@ void vu_buffer_vsprintf(vu_buffer *buf, const char *format, ...)
         va_end(locarg);
 
         grow_size = (count > 1000) ? count : 1000;
-        if (buffer_grow(buf, grow_size) < 0)
+        if (buffer_grow(buf, grow_size) < 0) {
+            va_end(argptr);
             return;
+        }
 
         size = buf->size - buf->use - 1;
         va_copy(locarg, argptr);
     }
     va_end(locarg);
+    va_end(argptr);
     buf->use += count;
     buf->content[buf->use] = '\0';
 }
