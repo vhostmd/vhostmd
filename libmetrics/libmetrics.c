@@ -823,7 +823,7 @@ static char *get_virtio_metrics(void)
                 usleep(10000);
                 if (time(NULL) > end_time) {
                     libmsg("%s(): Unable to send metrics request"
-                            " - timeout after %us\n", __func__, timeout);
+                            " - timeout after %lis\n", __func__, timeout);
                     goto error;
                 }
             }
@@ -856,7 +856,7 @@ static char *get_virtio_metrics(void)
                 usleep(10000);
                 if (time(NULL) > end_time) {
                     libmsg("%s(): Unable to read metrics"
-                            " - timeout after %us\n", __func__, timeout);
+                            " - timeout after %lis\n", __func__, timeout);
                     goto error;
                 }
             } else
