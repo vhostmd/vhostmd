@@ -488,7 +488,8 @@ int vu_append_string(char **dest, xmlChar * str)
    char *cp;
 
    if (*dest) {
-      asprintf(&cp, "%s,%s", *dest, str);
+      if (asprintf(&cp, "%s,%s", *dest, str) < 0)
+          return -1;
       free(*dest);
       *dest = cp;
    }

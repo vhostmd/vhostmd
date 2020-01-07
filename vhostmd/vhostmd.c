@@ -259,7 +259,8 @@ static int parse_group_metric(xmlDocPtr xml ATTRIBUTE_UNUSED,
       vu_log(VHOSTMD_WARN, "parse_group_metric: node path not found");
       return -1;
    }
-   asprintf(&cp, "%s/variable", path);
+   if (asprintf(&cp, "%s/variable", path) < 0)
+       goto error;
 
    obj = xmlXPathEval( BAD_CAST cp, ctxt);
    if ((obj == NULL) || (obj->type != XPATH_NODESET)) {
