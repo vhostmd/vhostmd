@@ -586,7 +586,8 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
    int ret = -1;
 
    *mdef = NULL;
-
+   memset(&pmdef, 0, sizeof(private_metric));
+   
    if (mdisk == NULL) {
        errno = ENODEV;
        return -1;
@@ -628,6 +629,8 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
       *mdef = lmdef;
       ret = 0;
    }
+
+out:
    if (pmdef.name)
       free(pmdef.name);
    if (pmdef.value)
@@ -635,7 +638,6 @@ int get_metric(const char *metric_name, metric **mdef, metric_context context)
    if (pmdef.context)
       free(pmdef.context);
 
-out:
    /* unlock library data */
    pthread_mutex_unlock(&libmetrics_mutex);
    return ret;
