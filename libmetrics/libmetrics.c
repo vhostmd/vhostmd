@@ -418,9 +418,8 @@ retry:
    }
 
    mdisk->doc = xmlCtxtReadMemory(mdisk->pctxt, mdisk->buffer, 
-           mdisk->length, "mdisk.xml", NULL, 
-           XML_PARSE_NOENT | XML_PARSE_NONET |
-           XML_PARSE_NOWARNING);
+                                  mdisk->length, "mdisk.xml", NULL, 
+                                  XML_PARSE_NONET | XML_PARSE_NOWARNING);
    if (!mdisk->doc) {
       libmsg("%s(): libxml failed to parse mdisk.xml buffer\n", __func__);
       goto error;
