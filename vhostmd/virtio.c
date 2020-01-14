@@ -191,7 +191,7 @@ static int vio_channel_open(channel_t * c)
     bzero(&address, sizeof(address));
     address.sun_family = AF_LOCAL;
 
-    strncpy(address.sun_path, c->uds_name, SUN_PATH_LEN);
+    strncpy(address.sun_path, c->uds_name, SUN_PATH_LEN - 1);
 
     if ((c->fd = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1)
         goto error;
