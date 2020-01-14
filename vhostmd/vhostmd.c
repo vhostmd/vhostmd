@@ -967,14 +967,17 @@ static int vhostmd_run(int diskfd)
       if (virtio_expiration_time < (update_period * 3))
          virtio_expiration_time = update_period * 3;
 
-      if (virtio_init(virtio_max_channels, virtio_expiration_time))
+      if (virtio_init(virtio_max_channels, virtio_expiration_time)) {
+         vu_buffer_delete(buf);
          return -1;
+      }
 
       rc = pthread_create(&virtio_tid, NULL, virtio_run, NULL);
 
       if (rc != 0) {
          vu_log(VHOSTMD_ERR, "Failed to start virtio thread '%s'\n",
                 strerror(rc));
+         vu_buffer_delete(buf);
          return -1;
       }
    }
