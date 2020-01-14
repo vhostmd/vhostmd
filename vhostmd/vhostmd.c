@@ -472,6 +472,7 @@ static int parse_transports(xmlDocPtr xml,
              transports |= XENSTORE;
 #else
 	     vu_log (VHOSTMD_ERR, "No support for xenstore transport in this vhostmd");
+         xmlXPathFreeObject(obj);
 	     return -1;
 #endif
 	 }
