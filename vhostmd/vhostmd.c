@@ -675,8 +675,12 @@ static int metrics_disk_busy(int fd, int busy)
 {
    md_header.busy = (uint32_t)(htonl(busy));
    
-   lseek(fd, offsetof(mdisk_header, busy), SEEK_SET);
-   write(fd, &(md_header.busy), sizeof(uint32_t));
+   if (lseek(fd, offsetof(mdisk_header, busy), SEEK_SET) == -1)
+       return -1;
+
+   if (write(fd, &(md_header.busy), sizeof(uint32_t)) == -1)
+       return -1;
+
    return 0;
 }
 
@@ -724,6 +728,8 @@ error:
 
 static int metrics_disk_update(int fd, vu_buffer *buf)
 {
+   int ret = -1;
+    
    if (buf->use > MDISK_SIZE) {
       vu_log(VHOSTMD_ERR, "Metrics data is larger than metrics disk");
       return -1;
@@ -731,11 +737,17 @@ static int metrics_disk_update(int fd, vu_buffer *buf)
       
    metrics_disk_busy(fd, 1);
    metrics_disk_header_update(fd, buf);
-   lseek(fd, MDISK_HEADER_SIZE, SEEK_SET);
-   write(fd, buf->content, buf->use);
-   metrics_disk_busy(fd, 0);
+   if (lseek(fd, MDISK_HEADER_SIZE, SEEK_SET) == -1)
+       goto out;
 
-   return 0;
+   if (write(fd, buf->content, buf->use) == -1)
+       goto out;
+
+   ret = 0;
+
+out:
+   metrics_disk_busy(fd, 0);
+   return ret;
 }
 
 static int metrics_free()
@@ -819,10 +831,15 @@ static int metrics_disk_create(void)
    }
 
    /* truncate to a possible new size */
-   ftruncate(fd, mdisk_size);
+   if (ftruncate(fd, mdisk_size) == -1){
+      vu_log(VHOSTMD_ERR, "Failed to truncate metrics disk: %s",
+             strerror(errno));
+      goto error;
+   }
 
    /* zero fill metrics data */
-   lseek(fd, MDISK_HEADER_SIZE, SEEK_SET);
+   if (lseek(fd, MDISK_HEADER_SIZE, SEEK_SET) == -1)
+      goto error;
    for (i = 0; i < size / MDISK_SIZE_MIN; i++)
       if (write(fd, buf, MDISK_SIZE_MIN) != MDISK_SIZE_MIN) {
          vu_log(VHOSTMD_ERR, "Error creating disk of requested "
