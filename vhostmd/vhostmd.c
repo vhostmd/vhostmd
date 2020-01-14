@@ -860,7 +860,8 @@ static int metrics_disk_create(void)
  error:
    free(dir);
    free(buf);
-   close(fd);
+   if (fd != -1)
+       close(fd);
    return -1;
 }
 
