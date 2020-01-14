@@ -552,8 +552,7 @@ static int parse_config_file(const char *filename)
       goto out;
 
    xml = xmlCtxtReadFile(pctxt, filename, NULL,
-                         XML_PARSE_NOENT | XML_PARSE_NONET |
-                         XML_PARSE_NOWARNING);
+                         XML_PARSE_NONET | XML_PARSE_NOWARNING);
    if (!xml) {
       vu_log(VHOSTMD_ERR, "libxml failed to parse config file %s",
                   filename);
