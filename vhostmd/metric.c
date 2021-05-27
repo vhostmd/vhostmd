@@ -292,6 +292,7 @@ int metric_xml(metric *m, vu_buffer *buf)
    char *n;
    char *v;
    char *t;
+   char *u;
    int i;
 
    if (metric_value_get(m))
@@ -312,28 +313,35 @@ int metric_xml(metric *m, vu_buffer *buf)
        n = vu_get_nth_token(m->name, ",", i, m->cnt); 
        t = vu_get_nth_token(m->type_str, ",", i, m->cnt);
        v = vu_get_nth_token(m->value, ",", i, m->cnt);
+       u = vu_get_nth_token(m->unit, ",", i, m->cnt);
        
-	   if (m->ctx == METRIC_CONTEXT_HOST) {
-		   vu_buffer_vsprintf(buf,
-				   "  <metric type='%s' context='host'>\n"
-				   "    <name>%s</name>\n"
-				   "    <value>%s</value>\n"
-				   "  </metric>\n",
-				   t,
-				   n,
-				   v);
+       if (m->ctx == METRIC_CONTEXT_HOST) {
+		   vu_buffer_vsprintf(buf, "  <metric type='%s' context='host'", t);
+           if (u && u[0] != '\0')
+               vu_buffer_vsprintf(buf, " unit='%s'", u);
+           vu_buffer_add(buf, ">\n", 3);
+           vu_buffer_vsprintf(buf,
+                              "    <name>%s</name>\n"
+                              "    <value>%s</value>\n"
+                              "  </metric>\n",
+                              n,
+                              v);
 	   }
 	   else {
 		   vu_buffer_vsprintf(buf,
-				   "  <metric type='%s' context='vm' id='%d' uuid='%s'>\n"
-				   "    <name>%s</name>\n"
-				   "    <value>%s</value>\n"
-				   "  </metric>\n",
-				   t,
-				   m->vm->id,
-				   m->vm->uuid,
-				   n,
-				   v);
+                              "  <metric type='%s' context='vm' id='%d' uuid='%s'",
+                              t,
+                              m->vm->id,
+                              m->vm->uuid);
+           if (u && u[0] != '\0')
+               vu_buffer_vsprintf(buf, " unit='%s'", u);
+           vu_buffer_add(buf, ">\n", 3);
+           vu_buffer_vsprintf(buf,
+                              "    <name>%s</name>\n"
+                              "    <value>%s</value>\n"
+                              "  </metric>\n",
+                              n,
+                              v);
 	   }
 	   if (n) free(n);
 	   if (t) free(t);

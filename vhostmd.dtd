@@ -31,6 +31,7 @@ Virtual Host Metrics Daemon (vhostmd). Configuration file DTD
           type (xml|group|int32|uint32|int64|uint64|real32|real64|string) #REQUIRED
           context (host|vm) #REQUIRED
           cnt CDATA #IMPLIED
+          unit CDATA #IMPLIED
 >
 <!ELEMENT variable (#PCDATA)>
 <!ATTLIST variable 
