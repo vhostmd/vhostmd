@@ -77,7 +77,7 @@ the logical && operator must be replaced with "&amp;&amp;".
           virsh nodeinfo | awk '/^CPU\(s\)/ {print $2}'
         </action>
       </metric>
-      <metric type="uint64" context="host">
+      <metric type="uint64" context="host" unit="MiB">
         <name>TotalPhyMem</name>
         <action>
           echo $((`virsh nodeinfo | awk '/^Memory/ {print $3}'` / 1024))
@@ -115,7 +115,7 @@ the logical && operator must be replaced with "&amp;&amp;".
         <variable name="PageInRate" type="uint64"/>
         <variable name="PageFaultRate" type="uint64"/>
       </metric>
-      <metric type="real64" context="host">
+      <metric type="real64" context="host" unit="s">
         <name>TotalCPUTime</name>
         <action>
           [ -f /proc/xen/privcmd ] &amp;&amp; xl list | awk '/^Domain-0/ {print $6}' || \
@@ -150,7 +150,7 @@ the logical && operator must be replaced with "&amp;&amp;".
           }'
         </action>
       </metric>
-      <metric type="real64" context="vm">
+      <metric type="real64" context="vm" unit="s">
         <name>TotalCPUTime</name>
         <action>
           virsh CONNECT dominfo NAME | sed 's/: */:/' | \

@@ -35,7 +35,7 @@ context attribute specifies whether the metric is host or vm.
       <name>TotalPhyMem</name>
       <value>8124</value>
     </metric>
-    <metric type="uint64" context="host">
+    <metric type="uint64" context="host" unit="MiB">
       <name>FreePhyMem</name>
       <value>8124</value>
     </metric>
@@ -43,7 +43,7 @@ context attribute specifies whether the metric is host or vm.
       <name>NumCPUsUtilized</name>
       <value>16</value>
     </metric>
-    <metric type="real64" context="vm" id="0">
+    <metric type="real64" context="vm" id="0" unit="s">
       <name>TotalCPUTime</name>
       <value>1234.567</value>
     </metric>
@@ -55,7 +55,7 @@ context attribute specifies whether the metric is host or vm.
       <name>NumCPUsUtilized</name>
       <value>16</value>
     </metric>
-    <metric type="real64" context="vm" id="2">
+    <metric type="real64" context="vm" id="2" unit="s">
       <name>TotalCPUTime</name>
       <value>1234.567</value>
     </metric>
