@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import libvirt
 import libxml2
 import sys
@@ -6,7 +6,7 @@ import os
 
 
 if len(sys.argv) != 2:
-    print 'USAGE: vif-stats domain-name'
+    print('USAGE: vif-stats domain-name')
     sys.exit(1)
 
 name = sys.argv[1];
@@ -14,14 +14,14 @@ name = sys.argv[1];
 # open libvirt connection
 conn = libvirt.openReadOnly(None)
 if conn == None:
-    print 'Failed to open connection to the hypervisor'
+    print('Failed to open connection to the hypervisor')
     sys.exit(1)
 
 # get domain
 try:
     dom = conn.lookupByName(name)
 except:
-    print 'Failed to find domain ' + name
+    print('Failed to find domain ' + name)
     sys.exit(1)
 
 # get domain config
@@ -29,7 +29,7 @@ xml = dom.XMLDesc(0)
 try:
     doc = libxml2.parseDoc(xml)
 except:
-    print 'Failed to parse domain xml'
+    print('Failed to parse domain xml')
     sys.exit(1)
 
 ctx = doc.xpathNewContext()
@@ -50,7 +50,7 @@ finally:
         doc.freeDoc()
 
 if len(vifs) == 0:
-    print "No vifs defined for domain %s" % name
+    print("No vifs defined for domain %s" % name)
     sys.exit(1)
 
 names = vifs.keys()
@@ -85,6 +85,6 @@ del dom
 del conn
 
 # print metrics XML to stdout
-print output
+print(output)
 
 sys.exit(0)
