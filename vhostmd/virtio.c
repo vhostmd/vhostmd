@@ -30,6 +30,7 @@
 #include <search.h>
 #include <dirent.h>
 #include <pthread.h>
+#include <stdlib.h>
 #include <libvirt/libvirt.h>
 
 #include "util.h"
