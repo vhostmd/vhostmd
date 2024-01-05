@@ -319,7 +319,7 @@ int metric_xml(metric *m, vu_buffer *buf)
 		   vu_buffer_vsprintf(buf, "  <metric type='%s' context='host'", t);
            if (u && u[0] != '\0')
                vu_buffer_vsprintf(buf, " unit='%s'", u);
-           vu_buffer_add(buf, ">\n", 3);
+           vu_buffer_add(buf, ">\n", 2);
            vu_buffer_vsprintf(buf,
                               "    <name>%s</name>\n"
                               "    <value>%s</value>\n"
@@ -335,7 +335,7 @@ int metric_xml(metric *m, vu_buffer *buf)
                               m->vm->uuid);
            if (u && u[0] != '\0')
                vu_buffer_vsprintf(buf, " unit='%s'", u);
-           vu_buffer_add(buf, ">\n", 3);
+           vu_buffer_add(buf, ">\n", 2);
            vu_buffer_vsprintf(buf,
                               "    <name>%s</name>\n"
                               "    <value>%s</value>\n"
@@ -346,6 +346,7 @@ int metric_xml(metric *m, vu_buffer *buf)
 	   if (n) free(n);
 	   if (t) free(t);
 	   if (v) free(v);
+	   if (u) free(u);
    }
 
    return 0;
