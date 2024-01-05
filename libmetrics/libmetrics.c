@@ -225,7 +225,7 @@ static metric *metric_alloc_padded(int pad)
 static int get_mdef(metric_disk *mdisk, private_metric *pmdef)
 {
    xmlXPathContextPtr ctxt = NULL;
-   xmlXPathObjectPtr obj;
+   xmlXPathObjectPtr obj = NULL;
    xmlNodePtr node;
    char *str;
    char *xpath;
