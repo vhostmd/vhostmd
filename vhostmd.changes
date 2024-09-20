@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Fri Sep 20 17:55:13 UTC 2024 - James Fehlig <jfehlig@suse.com>
+
+- Version 1.2
+  - Fix actions using the 'free' command
+  - Fix buffer accounting when generating metric XML
+  - Fix warning with gcc >= 13
+  - Fix implicit declarations
+  - Change actions to retrieve vendor and product info
+  - Add a 'unit' attribute to the metrics element
+  - vif-stats.py: convert to Python3
+  - Misc coverity fixes
+  - Relax virtio requirement in config file
+
+-------------------------------------------------------------------
 Wed Apr 10 22:21:29 UTC 2019 - <jfehlig@suse.com>
 
 - Version 1.1
