@@ -84,14 +84,14 @@ the logical && operator must be replaced with "&amp;&amp;".
         <name>UsedMem</name>
         <action>
           [ -f /proc/xen/privcmd ] &amp;&amp; echo "$((`xentop -b -i 1 | awk '/Domain-0/ {print $5}'` / 1024))" || \
-          free | egrep -i '^[[:space:]]*(.*buffers/cache:)' | awk '{ printf "%d\n", $3/1024; }'
+          free | egrep -i '^[[:space:]]*(.*Mem:)' | awk '{ printf "%d\n", $3/1024; }'
       </action>
       </metric>
       <metric type="uint64" context="host">
         <name>FreeMem</name>
         <action>
           [ -f /proc/xen/privcmd ] &amp;&amp; xl info | awk '/^free_memory/ {print $3}' || \
-          free | egrep -i '^[[:space:]]*(.*buffers/cache:)' | awk '{ printf "%d\n", $4/1024; }'
+          free | egrep -i '^[[:space:]]*(.*Mem:)' | awk '{ printf "%d\n", $7/1024; }'
         </action>
       </metric>
       <metric type="uint64" context="host">
