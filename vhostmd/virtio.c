@@ -277,34 +277,37 @@ static int vio_readdir(const char * path)
     }
 
     while ((ent = readdir(dir)) != NULL) {
-        int rc, id;
+        char tmp[SUN_PATH_LEN + 8];
+        struct stat st;
+        char *name = NULL;
+        int id = -1;
+        int rc;
+        channel_t *c = NULL;
 
-        if (sscanf(ent->d_name, "domain-%d-", &id) == 1) {
+        if (sscanf(ent->d_name, "domain-%d-", &id) == 1)
+            name = strchr(&(ent->d_name[strlen("domain-")]), '-');
+        else if (sscanf(ent->d_name, "%d-", &id) == 1)
+            name = strchr(ent->d_name, '-');
+        else
+            continue;
 
-            char tmp[SUN_PATH_LEN + 8];
-            struct stat st;
+        rc = snprintf(tmp, sizeof(tmp), "%s/%s/%s", path, ent->d_name, channel_name);
 
-            rc = snprintf(tmp, sizeof(tmp), "%s/%s/%s", path, ent->d_name, channel_name);
+        if (rc > 0 && rc < (int) sizeof(tmp) &&
+            strlen(tmp) < SUN_PATH_LEN &&
+            stat(tmp, &st) == 0 &&
+            S_ISSOCK(st.st_mode)) {
 
-            if (rc > 0 && rc < (int) sizeof(tmp) &&
-                strlen(tmp) < SUN_PATH_LEN &&
-                stat(tmp, &st) == 0 &&
-                S_ISSOCK(st.st_mode)) {
+            pthread_mutex_lock(&channel_mtx);
+            c = vio_channel_find(id, name, 0);
+            pthread_mutex_unlock(&channel_mtx);
 
-                channel_t *c = NULL;
-                const char *name = strchr(&(ent->d_name[strlen("domain-")]), '-');
-
-                pthread_mutex_lock(&channel_mtx);
-                c = vio_channel_find(id, name, 0);
-                pthread_mutex_unlock(&channel_mtx);
-
-                if (c && c->fd == FREE) {
-                    c->uds_name = strdup(tmp);
-                    if (c->uds_name == NULL)
-                        goto error;
-                    if (vio_channel_open(c))
-                        goto error;
-                }
+            if (c && c->fd == FREE) {
+                c->uds_name = strdup(tmp);
+                if (c->uds_name == NULL)
+                    goto error;
+                if (vio_channel_open(c))
+                    goto error;
             }
         }
     }
