@@ -20,7 +20,8 @@ Virtual Host Metrics Daemon (vhostmd). Configuration file DTD
 <!ELEMENT update_period (#PCDATA)>
 <!ELEMENT transport (#PCDATA)>
 
-<!ELEMENT virtio (max_channels,expiration_time)>
+<!ELEMENT virtio (channel_path,max_channels,expiration_time)>
+<!ELEMENT channel_path (#PCDATA)>
 <!ELEMENT max_channels (#PCDATA)>
 <!ELEMENT expiration_time (#PCDATA)>
 

@@ -34,6 +34,7 @@ the logical && operator must be replaced with "&amp;&amp;".
         <size unit="k">256</size>
       </disk>
       <virtio>
+	<channel_path>/var/run/libvirt/qemu/channel</channel_path>
         <max_channels>1024</max_channels>
         <expiration_time>15</expiration_time>
       </virtio>

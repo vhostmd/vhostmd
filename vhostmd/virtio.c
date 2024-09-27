@@ -68,7 +68,7 @@ static channel_t *channel = NULL;
 static id_map_t *id_map = NULL;
 static time_t exp_period = 0;
 
-static const char *channel_path = "/var/lib/libvirt/qemu/channel/target";
+static const char *channel_path = NULL;
 static const char *channel_name = "org.github.vhostmd.1";
 static int channel_max = 0;
 static volatile int channel_count = 0;
@@ -572,13 +572,14 @@ static void vio_handle_io(unsigned epoll_wait_ms)
  * Once the channel is added to epoll the vu_buffer can be accessed
  * by the epoll_event.data.ptr.
  */
-int virtio_init(int _max_channel, int _expiration_period)
+int virtio_init(char *_channel_path, int _max_channel, int _expiration_period)
 {
     int i;
 
     if (virtio_status == VIRTIO_INIT) {
         pthread_mutex_init(&channel_mtx, NULL);
 
+        channel_path = _channel_path;
         channel_max = _max_channel;
         exp_period = _expiration_period;
         channel_count = 0;

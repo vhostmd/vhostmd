@@ -105,6 +105,7 @@ static mdisk_header md_header =
          };
 static char *search_path = NULL;
 static int transports = 0;
+static char *virtio_channel_path = NULL;
 static int virtio_max_channels = 1024;
 static int virtio_expiration_time = 15;
 
@@ -623,7 +624,14 @@ static int parse_config_file(const char *filename)
    }
     
    if (transports & VIRTIO) {
-      if (vu_xpath_long("string(./globals/virtio/max_channels[1])", ctxt, &l) == 0)
+       virtio_channel_path = vu_xpath_string("string(./globals/virtio/channel_path[1])", ctxt);
+       if (virtio_channel_path == NULL) {
+           virtio_channel_path = strdup("/var/lib/libvirt/qemu/channel/target");
+           if (virtio_channel_path == NULL)
+               goto out;
+       }
+
+       if (vu_xpath_long("string(./globals/virtio/max_channels[1])", ctxt, &l) == 0)
          virtio_max_channels = (int)l;
 
       if (vu_xpath_long("string(./globals/virtio/expiration_time[1])", ctxt, &l) == 0)
@@ -980,7 +988,7 @@ static int vhostmd_run(int diskfd)
       if (virtio_expiration_time < (update_period * 3))
          virtio_expiration_time = update_period * 3;
 
-      if (virtio_init(virtio_max_channels, virtio_expiration_time)) {
+      if (virtio_init(virtio_channel_path, virtio_max_channels, virtio_expiration_time)) {
          vu_buffer_delete(buf);
          return -1;
       }

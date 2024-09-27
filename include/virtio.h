@@ -24,7 +24,7 @@
 /*
  * Initialize virtio layer
  */
-int virtio_init(int max_channel, int expiration_period);
+int virtio_init(char *channel_path, int max_channel, int expiration_period);
 
 /*
  * Main virtio function

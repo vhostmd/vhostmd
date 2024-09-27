@@ -51,6 +51,7 @@ includes a few examples of user-defined metrics, which provide a
         <size unit="k">256</size>
       </disk>
       <virtio>
+        <channel_path>/var/run/libvirt/qemu/channel</channel_path>
         <max_channels>1024</max_channels>
         <expiration_time>15</expiration_time>
       </virtio>
@@ -300,6 +301,8 @@ between the host and VMs. Basically for a virtio serial device, QEMU creates
 - 'connects' both to a 'communication channel'
 
 It can be configured in the virtio section of the vhostmd configuration file.
+<channel_path> defines a path on the host where QEMU creates the unix domain
+sockets.
 <max_channels> defines the maximum number of virtio channels/VMs supported
 by the vhostmd instance with a default value of 1024.
 <expiration_time> is the time after which the virtio serial channel of a VM
