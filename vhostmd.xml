@@ -98,13 +98,13 @@ the logical && operator must be replaced with "&amp;&amp;".
       <metric type="uint64" context="host">
         <name>PagedInMemory</name>
         <action>
-          vmstat -s | awk '/pages paged in/ {printf "%d\n", $1 / 1024 * $(getconf PAGESIZE) / 1024;}'
+          vmstat -s | awk '/K paged in/ {printf "%d\n", $1;}'
         </action>
       </metric>
       <metric type="uint64" context="host">
         <name>PagedOutMemory</name>
         <action>
-          vmstat -s | awk '/pages paged out/ {printf "%d\n", $1 / 1024 * $(getconf PAGESIZE) / 1024;}'
+          vmstat -s | awk '/K paged out/ {printf "%d\n", $1;}'
         </action>
       </metric>
       <metric type="group" context="host">
